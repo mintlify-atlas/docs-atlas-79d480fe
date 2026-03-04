@@ -1,0 +1,170 @@
+{
+  "projectType": "saas",
+  "projectName": "Contafy",
+  "projectDescription": "SaaS platform for managing Mexican CFDI invoices with multi-profile support, automated XML processing, and financial reporting",
+  "theme": "mint",
+  "primaryColor": "#048c3c",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/dashboard",
+              "features/invoice-management",
+              "features/expense-tracking",
+              "features/multi-profile",
+              "features/reports-analytics",
+              "features/sat-search"
+            ]
+          },
+          {
+            "group": "User Guide",
+            "pages": [
+              "guides/authentication",
+              "guides/profile-setup",
+              "guides/uploading-invoices",
+              "guides/managing-expenses",
+              "guides/viewing-reports",
+              "guides/exporting-data"
+            ]
+          },
+          {
+            "group": "Subscription & Plans",
+            "pages": [
+              "subscription/plans-pricing",
+              "subscription/upgrading",
+              "subscription/limits"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Authentication",
+            "pages": [
+              "api/auth/register",
+              "api/auth/login",
+              "api/auth/refresh-token",
+              "api/auth/verify-email",
+              "api/auth/forgot-password",
+              "api/auth/reset-password"
+            ]
+          },
+          {
+            "group": "Profiles",
+            "pages": [
+              "api/profiles/list-profiles",
+              "api/profiles/create-profile",
+              "api/profiles/update-profile",
+              "api/profiles/delete-profile"
+            ]
+          },
+          {
+            "group": "Invoices",
+            "pages": [
+              "api/invoices/list-invoices",
+              "api/invoices/upload-invoice",
+              "api/invoices/get-invoice",
+              "api/invoices/delete-invoice",
+              "api/invoices/get-metrics",
+              "api/invoices/get-trend-data"
+            ]
+          },
+          {
+            "group": "Expenses",
+            "pages": [
+              "api/expenses/list-expenses",
+              "api/expenses/create-expense",
+              "api/expenses/update-expense",
+              "api/expenses/delete-expense"
+            ]
+          },
+          {
+            "group": "Subscription",
+            "pages": [
+              "api/subscription/get-subscription",
+              "api/subscription/get-plans",
+              "api/subscription/create-checkout",
+              "api/subscription/create-portal-session"
+            ]
+          },
+          {
+            "group": "SAT Search",
+            "pages": [
+              "api/sat/search",
+              "api/sat/get-details",
+              "api/sat/validate-rfc"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Development",
+        "groups": [
+          {
+            "group": "Architecture",
+            "pages": [
+              "development/architecture",
+              "development/tech-stack",
+              "development/project-structure",
+              "development/data-fetching"
+            ]
+          },
+          {
+            "group": "Contributing",
+            "pages": [
+              "development/setup",
+              "development/conventions",
+              "development/deployment"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Interactive dashboard with real-time financial metrics",
+    "Automated CFDI XML processing and validation",
+    "Multi-profile RFC management from single account",
+    "Expense tracking and payment status monitoring",
+    "Interactive charts and financial trend analysis",
+    "PDF and Excel export capabilities",
+    "SAT (Mexican Tax Authority) integration and search",
+    "Subscription-based plans with usage limits",
+    "Secure authentication with JWT and email verification",
+    "Dark theme and responsive mobile design"
+  ],
+  "publicApiSurface": [
+    "/api/auth/register",
+    "/api/auth/login",
+    "/api/auth/refresh-token",
+    "/api/auth/verify-email",
+    "/api/auth/forgot-password",
+    "/api/auth/reset-password",
+    "/api/profiles",
+    "/api/invoices",
+    "/api/invoices/upload",
+    "/api/invoices/metrics",
+    "/api/expenses",
+    "/api/subscription",
+    "/api/subscription/plans",
+    "/api/subscription/checkout",
+    "/api/sat/search",
+    "/api/sat/validate-rfc"
+  ]
+}
