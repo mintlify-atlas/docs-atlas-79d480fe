@@ -1,0 +1,130 @@
+---
+title: 'Login'
+api: 'POST /api/auth/login'
+description: 'Authenticate a user and obtain access tokens'
+---
+
+Authenticates a user with email and password credentials. Returns access and refresh tokens for subsequent authenticated requests.
+
+## Authentication
+
+No authentication required.
+
+## Request Body
+
+<ParamField body="email" type="string" required>
+  User's registered email address.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password.
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string">
+  Success message confirming authentication.
+</ResponseField>
+
+<ResponseField name="accessToken" type="string">
+  JWT access token for authenticating API requests. Include this in the `Authorization` header as `Bearer {accessToken}`.
+</ResponseField>
+
+<ResponseField name="refreshToken" type="string">
+  JWT refresh token for obtaining new access tokens when they expire.
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  The authenticated user's information.
+  
+  <ResponseField name="id" type="string">
+    Unique user identifier.
+  </ResponseField>
+  
+  <ResponseField name="email" type="string">
+    User's email address.
+  </ResponseField>
+  
+  <ResponseField name="nombre" type="string | null">
+    User's first name.
+  </ResponseField>
+  
+  <ResponseField name="apellido" type="string | null">
+    User's last name.
+  </ResponseField>
+  
+  <ResponseField name="telefono" type="string | null">
+    User's phone number.
+  </ResponseField>
+  
+  <ResponseField name="email_verified" type="boolean">
+    Email verification status.
+  </ResponseField>
+  
+  <ResponseField name="tour_version" type="string | null">
+    Version of the product tour completed by the user.
+  </ResponseField>
+  
+  <ResponseField name="tour_completed_at" type="string | null">
+    Timestamp when the tour was completed.
+  </ResponseField>
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X POST https://api.contafy.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "usuario@ejemplo.com",
+    "password": "SecurePass123!"
+  }'
+```
+
+## Example Response
+
+```json
+{
+  "message": "Inicio de sesión exitoso",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "usr_1a2b3c4d5e6f7g8h",
+    "email": "usuario@ejemplo.com",
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "telefono": "+52 55 1234 5678",
+    "email_verified": true,
+    "tour_version": "v1.0",
+    "tour_completed_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+## Error Responses
+
+<ResponseField name="error" type="string">
+  Error type identifier.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable error message.
+</ResponseField>
+
+### Common Errors
+
+**401 Unauthorized**
+```json
+{
+  "error": "INVALID_CREDENTIALS",
+  "message": "Email o contraseña incorrectos"
+}
+```
+
+**400 Bad Request**
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "Email y contraseña son requeridos"
+}
+```

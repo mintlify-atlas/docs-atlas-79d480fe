@@ -1,0 +1,121 @@
+---
+title: 'Create Checkout Session'
+description: 'Create a Stripe checkout session for subscription upgrade'
+---
+
+## POST /api/subscription/create-checkout
+
+Creates a Stripe Checkout session to upgrade or subscribe to a paid plan (BASIC or PRO). Returns a session ID and URL to redirect the user to complete payment.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Request Body
+
+<ParamField body="plan" type="string" required>
+  Plan to subscribe to. Options: `BASIC`, `PRO`
+</ParamField>
+
+<ParamField body="promotionCode" type="string" optional>
+  Promotional code for discounts (3-50 characters). Will be converted to uppercase
+</ParamField>
+
+<ParamField body="billing" type="string" optional default="monthly">
+  Billing period. Options: `monthly`, `annual`
+</ParamField>
+
+## Response
+
+<ResponseField name="sessionId" type="string" required>
+  Stripe Checkout session ID
+</ResponseField>
+
+<ResponseField name="url" type="string" required>
+  URL to redirect the user to complete the checkout process
+</ResponseField>
+
+<ResponseField name="message" type="string" required>
+  Success message
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X POST "https://api.contafy.com/api/subscription/create-checkout" \
+  -H "Content-Type: application/json" \
+  -H "Cookie: access_token=your_access_token" \
+  -d '{
+    "plan": "PRO",
+    "promotionCode": "PROMO2024",
+    "billing": "annual"
+  }'
+```
+
+## Example Response
+
+```json
+{
+  "sessionId": "cs_test_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+  "url": "https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+  "message": "Checkout session created successfully"
+}
+```
+
+## Usage Flow
+
+1. Call this endpoint to create a checkout session
+2. Redirect the user to the returned `url`
+3. User completes payment on Stripe's hosted checkout page
+4. User is redirected back to your success URL
+5. Stripe webhook updates the subscription status
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request" type="error">
+  Invalid request parameters
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Invalid plan. Must be BASIC or PRO"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="409 Conflict" type="error">
+  User already has an active subscription to the requested plan
+  ```json
+  {
+    "error": "Conflict",
+    "message": "You are already subscribed to this plan"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server or Stripe error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "Failed to create checkout session"
+  }
+  ```
+</ResponseField>
+
+<Note>
+  The checkout session expires after 24 hours. Users must complete payment within this timeframe.
+</Note>
+
+<Tip>
+  For annual billing, consider displaying the discount percentage to encourage upgrades.
+</Tip>

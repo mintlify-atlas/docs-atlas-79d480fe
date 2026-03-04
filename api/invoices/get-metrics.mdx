@@ -1,0 +1,299 @@
+---
+title: "Get Metrics"
+api: "GET /api/metrics"
+description: "Retrieve financial metrics for a specific period"
+---
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the Authorization header.
+
+```
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+## Query Parameters
+
+<ParamField query="profile_id" type="string">
+  Filter metrics by profile ID
+</ParamField>
+
+<ParamField query="mes" type="number">
+  Month to retrieve metrics for (1-12)
+</ParamField>
+
+<ParamField query="año" type="number">
+  Year to retrieve metrics for
+</ParamField>
+
+<ParamField query="regimen_fiscal" type="string">
+  Filter by tax regime code
+</ParamField>
+
+## Response
+
+<ResponseField name="period" type="object">
+  Period information
+  
+  <Expandable title="Period">
+    <ResponseField name="id" type="string">
+      Period identifier
+    </ResponseField>
+    
+    <ResponseField name="start" type="string">
+      Period start date in ISO format
+    </ResponseField>
+    
+    <ResponseField name="end" type="string">
+      Period end date in ISO format
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="flujo" type="object">
+  Cash flow metrics (base de flujo - actual payments)
+  
+  <Expandable title="Flujo">
+    <ResponseField name="ingresos_cobrados" type="number">
+      Income collected (actual cash received)
+    </ResponseField>
+    
+    <ResponseField name="egresos_pagados" type="number">
+      Expenses paid (actual cash paid out)
+    </ResponseField>
+    
+    <ResponseField name="flujo_neto" type="number">
+      Net cash flow (ingresos_cobrados - egresos_pagados)
+    </ResponseField>
+    
+    <ResponseField name="ingresos_cobrados_sin_conciliar" type="number" optional>
+      Part of collected income from payment complements without related PPD invoice
+    </ResponseField>
+    
+    <ResponseField name="egresos_pagados_sin_conciliar" type="number" optional>
+      Part of paid expenses from payment complements without related PPD expense
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="devengado" type="object">
+  Accrual metrics (base devengada - invoice date basis)
+  
+  <Expandable title="Devengado">
+    <ResponseField name="ingresos_devengados" type="number">
+      Accrued income (total from invoices issued)
+    </ResponseField>
+    
+    <ResponseField name="egresos_devengados" type="number">
+      Accrued expenses (total from expenses received)
+    </ResponseField>
+    
+    <ResponseField name="resultado_devengado" type="number">
+      Accrual result (ingresos_devengados - egresos_devengados)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="impuestos" type="object">
+  Tax metrics
+  
+  <Expandable title="Impuestos">
+    <ResponseField name="iva_trasladado" type="object">
+      IVA charged on invoices issued
+      
+      <Expandable title="ImpuestosItem">
+        <ResponseField name="cobrado" type="number" optional>
+          Collected amount
+        </ResponseField>
+        
+        <ResponseField name="devengado" type="number" optional>
+          Accrued amount
+        </ResponseField>
+        
+        <ResponseField name="pagado" type="number" optional>
+          Paid amount
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="iva_acreditable" type="object">
+      IVA creditable from expenses
+      
+      <Expandable title="ImpuestosItem">
+        <ResponseField name="cobrado" type="number" optional>
+          Collected amount
+        </ResponseField>
+        
+        <ResponseField name="devengado" type="number" optional>
+          Accrued amount
+        </ResponseField>
+        
+        <ResponseField name="pagado" type="number" optional>
+          Paid amount
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="retenciones_iva" type="object">
+      IVA withholdings
+      
+      <Expandable title="ImpuestosItem">
+        <ResponseField name="cobrado" type="number" optional>
+          Collected amount
+        </ResponseField>
+        
+        <ResponseField name="devengado" type="number" optional>
+          Accrued amount
+        </ResponseField>
+        
+        <ResponseField name="pagado" type="number" optional>
+          Paid amount
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="retenciones_isr" type="object">
+      ISR withholdings
+      
+      <Expandable title="ImpuestosItem">
+        <ResponseField name="cobrado" type="number" optional>
+          Collected amount
+        </ResponseField>
+        
+        <ResponseField name="devengado" type="number" optional>
+          Accrued amount
+        </ResponseField>
+        
+        <ResponseField name="pagado" type="number" optional>
+          Paid amount
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pendientes" type="object">
+  Pending amounts
+  
+  <Expandable title="Pendientes">
+    <ResponseField name="por_cobrar" type="number">
+      Accounts receivable (invoices not yet collected)
+    </ResponseField>
+    
+    <ResponseField name="por_pagar" type="number">
+      Accounts payable (expenses not yet paid)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X GET "https://api.contafy.com/api/metrics?profile_id=prof_123&mes=3&año=2026" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+## Example Response
+
+```json
+{
+  "period": {
+    "id": "period_2026_03",
+    "start": "2026-03-01T00:00:00Z",
+    "end": "2026-03-31T23:59:59Z"
+  },
+  "flujo": {
+    "ingresos_cobrados": 150000.00,
+    "egresos_pagados": 80000.00,
+    "flujo_neto": 70000.00,
+    "ingresos_cobrados_sin_conciliar": 0,
+    "egresos_pagados_sin_conciliar": 0
+  },
+  "devengado": {
+    "ingresos_devengados": 200000.00,
+    "egresos_devengados": 100000.00,
+    "resultado_devengado": 100000.00
+  },
+  "impuestos": {
+    "iva_trasladado": {
+      "cobrado": 24000.00,
+      "devengado": 32000.00
+    },
+    "iva_acreditable": {
+      "pagado": 12800.00,
+      "devengado": 16000.00
+    },
+    "retenciones_iva": {
+      "cobrado": 1500.00,
+      "devengado": 2000.00
+    },
+    "retenciones_isr": {
+      "cobrado": 1000.00,
+      "devengado": 1333.33
+    }
+  },
+  "pendientes": {
+    "por_cobrar": 50000.00,
+    "por_pagar": 20000.00
+  }
+}
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized">
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Invalid or missing access token"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="404 Not Found">
+  When the user has no subscription or no data for the specified period, the endpoint returns default metrics with all values set to zero.
+  
+  ```json
+  {
+    "period": { "id": "", "start": "", "end": "" },
+    "flujo": {
+      "ingresos_cobrados": 0,
+      "egresos_pagados": 0,
+      "flujo_neto": 0
+    },
+    "devengado": {
+      "ingresos_devengados": 0,
+      "egresos_devengados": 0,
+      "resultado_devengado": 0
+    },
+    "impuestos": {
+      "iva_trasladado": {},
+      "iva_acreditable": {},
+      "retenciones_iva": {},
+      "retenciones_isr": {}
+    },
+    "pendientes": {
+      "por_cobrar": 0,
+      "por_pagar": 0
+    }
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error">
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>
+
+## Notes
+
+- Metrics are calculated based on two accounting methods:
+  - **Flujo (Cash basis)**: Based on actual payment dates from payment complements
+  - **Devengado (Accrual basis)**: Based on invoice dates
+- Tax metrics include both collected/paid amounts and accrued amounts
+- If no period parameters are provided, metrics for the current month are returned
+- The endpoint handles missing data gracefully by returning zero values

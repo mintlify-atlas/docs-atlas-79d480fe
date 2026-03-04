@@ -1,0 +1,95 @@
+---
+title: 'Delete Expense'
+description: 'Delete a manual expense'
+---
+
+## DELETE /api/accrued-expenses/:id
+
+Deletes an existing manual expense. Only expenses with `tipo_origen: MANUAL` can be deleted. XML-imported expenses cannot be removed through this endpoint.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier of the expense to delete
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string" required>
+  Success message confirming deletion
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X DELETE "https://api.contafy.com/api/accrued-expenses/expense-789" \
+  -H "Cookie: access_token=your_access_token"
+```
+
+## Example Response
+
+```json
+{
+  "message": "Expense deleted successfully"
+}
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request" type="error">
+  Attempting to delete an XML-imported expense
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Cannot delete XML-imported expenses. Only manual expenses can be deleted."
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="403 Forbidden" type="error">
+  User does not have permission to delete this expense
+  ```json
+  {
+    "error": "Forbidden",
+    "message": "You do not have permission to delete this expense"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="404 Not Found" type="error">
+  Expense not found
+  ```json
+  {
+    "error": "Not Found",
+    "message": "Expense not found"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>
+
+<Note>
+  This operation is permanent and cannot be undone. Ensure you want to delete the expense before making this request.
+</Note>

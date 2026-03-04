@@ -1,0 +1,91 @@
+---
+title: 'Delete Profile'
+api: 'DELETE /api/profiles/{profileId}'
+description: 'Delete an existing profile permanently'
+---
+
+## Authentication
+
+This endpoint requires authentication using a JWT token in the Authorization header.
+
+## Path Parameters
+
+<ParamField path="profileId" type="string" required>
+  The unique identifier of the profile to delete
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string" required>
+  Success message confirming profile deletion
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X DELETE https://api.contafy.com/api/profiles/prof_1234567890 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+## Example Response
+
+```json
+{
+  "message": "Profile deleted successfully"
+}
+```
+
+## Error Responses
+
+### 401 Unauthorized
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "Invalid or missing authentication token"
+}
+```
+
+### 403 Forbidden
+
+```json
+{
+  "error": "Forbidden",
+  "message": "You do not have permission to delete this profile"
+}
+```
+
+### 404 Not Found
+
+```json
+{
+  "error": "Not Found",
+  "message": "Profile not found"
+}
+```
+
+### 409 Conflict
+
+```json
+{
+  "error": "Conflict",
+  "message": "Cannot delete profile with active invoices. Please archive or transfer invoices first."
+}
+```
+
+### 500 Internal Server Error
+
+```json
+{
+  "error": "Internal Server Error",
+  "message": "An error occurred while deleting the profile"
+}
+```
+
+## Important Notes
+
+- Deleting a profile is a permanent action and cannot be undone
+- Profiles with active invoices or ongoing transactions may be protected from deletion
+- Consider archiving or freezing profiles instead of deleting them to preserve historical data
+- All associated data and configurations will be permanently removed

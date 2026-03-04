@@ -1,0 +1,560 @@
+---
+title: Deployment
+description: Deploy Contafy to production with Vercel or alternative platforms
+---
+
+Contafy is optimized for deployment on Vercel but can be deployed to any platform that supports Next.js.
+
+## Vercel deployment (recommended)
+
+Vercel is the easiest and most optimized platform for Next.js applications.
+
+### Initial setup
+
+1. **Create a Vercel account** at [vercel.com](https://vercel.com)
+2. **Install Vercel CLI** (optional):
+   ```bash
+   npm install -g vercel
+   ```
+
+### Deploy from Git
+
+#### Connect repository
+
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Click **Import Git Repository**
+3. Select your Contafy repository
+4. Click **Import**
+
+#### Configure project
+
+Vercel will auto-detect Next.js settings:
+
+- **Framework Preset**: Next.js
+- **Build Command**: `pnpm build`
+- **Output Directory**: `.next`
+- **Install Command**: `pnpm install`
+- **Development Command**: `pnpm dev`
+
+#### Set environment variables
+
+Add your production environment variables:
+
+**Required variables**:
+
+```env
+# API Backend URL (your production backend)
+NEXT_PUBLIC_API_URL=https://api.contafy.com
+
+# Frontend URL (your production frontend)
+NEXT_PUBLIC_FRONTEND_URL=https://contafy.com
+
+# Admin route (optional)
+ADMIN_DISCOUNT_ROUTE=internal/discount-management
+```
+
+**Firebase variables** (if using Firebase):
+
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-app.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-app.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+```
+
+#### Deploy
+
+1. Click **Deploy**
+2. Wait for build to complete (2-5 minutes)
+3. Your site is live at `https://your-project.vercel.app`
+
+### Automatic deployments
+
+Vercel automatically deploys:
+
+- **Production**: Deploys from `main` branch
+- **Preview**: Deploys from pull requests and other branches
+
+**Workflow**:
+
+1. Push to `main` → Production deployment
+2. Create pull request → Preview deployment
+3. Each commit → Updated preview
+
+### Custom domain
+
+1. Go to your project settings
+2. Navigate to **Domains**
+3. Add your custom domain (e.g., `contafy.com`)
+4. Configure DNS records:
+   ```
+   Type: CNAME
+   Name: @
+   Value: cname.vercel-dns.com
+   ```
+5. Wait for DNS propagation (5 minutes - 48 hours)
+
+### Deploy from CLI
+
+Alternatively, deploy using Vercel CLI:
+
+```bash
+# Login to Vercel
+vercel login
+
+# Deploy to production
+vercel --prod
+
+# Deploy preview
+vercel
+```
+
+## Environment variable management
+
+### Production vs Preview vs Development
+
+Vercel supports environment-specific variables:
+
+| Environment | When used |
+|-------------|----------|
+| **Production** | `main` branch deploys |
+| **Preview** | Pull request and branch deploys |
+| **Development** | Local development |
+
+**Example configuration**:
+
+```env
+# Production
+NEXT_PUBLIC_API_URL=https://api.contafy.com
+
+# Preview
+NEXT_PUBLIC_API_URL=https://api-staging.contafy.com
+
+# Development
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+### Updating environment variables
+
+1. Go to project **Settings** → **Environment Variables**
+2. Add or edit variables
+3. **Important**: Redeploy for changes to take effect
+
+```bash
+# Redeploy latest commit
+vercel --prod
+```
+
+### Sensitive variables
+
+Never commit sensitive data:
+
+- API keys
+- Database credentials
+- Auth secrets
+- Firebase config
+
+Always use environment variables.
+
+## Build process
+
+### Local build test
+
+Test production build locally:
+
+```bash
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
+```
+
+Open [http://localhost:3000](http://localhost:3000) to verify.
+
+### Build output
+
+Next.js generates:
+
+```
+.next/
+├── cache/              # Build cache
+├── server/             # Server-side code
+│   ├── app/           # App Router pages
+│   └── chunks/        # Code chunks
+├── static/            # Static assets
+│   ├── chunks/        # Client JavaScript
+│   ├── css/           # Compiled CSS
+│   └── media/         # Optimized images
+└── types/             # Generated TypeScript types
+```
+
+### Build optimization
+
+Next.js automatically:
+
+- **Code splits**: Each route is a separate bundle
+- **Tree shakes**: Removes unused code
+- **Minifies**: Compresses JavaScript and CSS
+- **Optimizes images**: Converts to WebP/AVIF
+- **Static generates**: Pre-renders static pages
+
+### Build errors
+
+Common build errors and fixes:
+
+#### TypeScript errors
+
+```bash
+# Run type checking locally
+pnpm typecheck
+```
+
+Fix all type errors before deploying.
+
+#### ESLint errors
+
+```bash
+# Run linting locally
+pnpm lint
+```
+
+Fix all lint errors or warnings.
+
+#### Missing environment variables
+
+Ensure all required `NEXT_PUBLIC_*` variables are set in Vercel.
+
+## Alternative deployment options
+
+While Vercel is recommended, Contafy can be deployed to other platforms.
+
+### Netlify
+
+**Setup**:
+
+1. Connect repository to Netlify
+2. Configure build settings:
+   - **Build command**: `pnpm build`
+   - **Publish directory**: `.next`
+   - **Install command**: `pnpm install`
+3. Add environment variables
+4. Deploy
+
+**Note**: Install Next.js plugin for Netlify:
+
+```bash
+npm install @netlify/plugin-nextjs
+```
+
+### Railway
+
+**Setup**:
+
+1. Connect repository to Railway
+2. Railway auto-detects Next.js
+3. Add environment variables
+4. Deploy
+
+**Railway config** (optional `railway.toml`):
+
+```toml
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "pnpm start"
+```
+
+### DigitalOcean App Platform
+
+**Setup**:
+
+1. Create new app in DigitalOcean
+2. Connect repository
+3. Configure app:
+   - **Build Command**: `pnpm build`
+   - **Run Command**: `pnpm start`
+4. Add environment variables
+5. Deploy
+
+### AWS Amplify
+
+**Setup**:
+
+1. Connect repository to AWS Amplify
+2. Configure build settings:
+   ```yaml
+   version: 1
+   frontend:
+     phases:
+       preBuild:
+         commands:
+           - npm install -g pnpm
+           - pnpm install
+       build:
+         commands:
+           - pnpm build
+     artifacts:
+       baseDirectory: .next
+       files:
+         - '**/*'
+     cache:
+       paths:
+         - node_modules/**/*
+   ```
+3. Add environment variables
+4. Deploy
+
+### Docker deployment
+
+For containerized deployments:
+
+**Dockerfile**:
+
+```dockerfile
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Build application
+RUN pnpm build
+
+# Production stage
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy built assets
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/public ./public
+
+# Set environment
+ENV NODE_ENV=production
+
+# Expose port
+EXPOSE 3000
+
+# Start application
+CMD ["pnpm", "start"]
+```
+
+**Build and run**:
+
+```bash
+# Build image
+docker build -t contafy .
+
+# Run container
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_API_URL=https://api.contafy.com \
+  -e NEXT_PUBLIC_FRONTEND_URL=https://contafy.com \
+  contafy
+```
+
+## Performance optimization
+
+### CDN and edge caching
+
+Vercel automatically provides:
+
+- **Global CDN**: Content served from nearest edge location
+- **Edge caching**: Static assets cached globally
+- **Automatic HTTPS**: Free SSL certificates
+
+### Image optimization
+
+Next.js Image component automatically:
+
+- Serves WebP/AVIF formats
+- Generates responsive images
+- Lazy loads images
+- Optimizes on-demand
+
+### Bundle analysis
+
+Analyze bundle size:
+
+```bash
+# Install analyzer
+pnpm add -D @next/bundle-analyzer
+
+# Enable in next.config.ts
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+module.exports = withBundleAnalyzer(nextConfig);
+
+# Run analysis
+ANALYZE=true pnpm build
+```
+
+Open `http://localhost:8888` to view bundle analysis.
+
+## Monitoring and analytics
+
+### Vercel Analytics
+
+Enable Vercel Analytics:
+
+1. Go to project settings
+2. Navigate to **Analytics**
+3. Enable **Web Analytics**
+
+Tracks:
+
+- Page views
+- Performance metrics
+- User sessions
+
+### Error tracking
+
+Consider integrating:
+
+- **Sentry**: Error tracking and monitoring
+- **LogRocket**: Session replay and debugging
+- **Datadog**: Full-stack observability
+
+## Rollback and versioning
+
+### Rollback deployment
+
+In Vercel:
+
+1. Go to **Deployments**
+2. Find previous successful deployment
+3. Click **⋯** → **Promote to Production**
+
+Your site instantly rolls back.
+
+### Deployment history
+
+Vercel keeps all deployments:
+
+- View past deployments
+- Access preview URLs
+- Compare builds
+- Instant rollback
+
+## Security considerations
+
+### HTTPS
+
+Always use HTTPS in production:
+
+- Vercel provides automatic HTTPS
+- Use `https://` in all URLs
+- Enable HSTS headers
+
+### Environment variables
+
+Never expose sensitive data:
+
+```tsx
+// Bad - exposes to client
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+
+// Good - server-only
+const API_KEY = process.env.API_KEY;
+```
+
+**Remember**: `NEXT_PUBLIC_*` variables are exposed to the browser.
+
+### Security headers
+
+Add security headers in `next.config.ts`:
+
+```tsx
+const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+        ],
+      },
+    ];
+  },
+};
+```
+
+## Troubleshooting
+
+### Build fails
+
+1. **Check build logs** in Vercel dashboard
+2. **Run build locally**: `pnpm build`
+3. **Fix errors** and push changes
+
+### Environment variables not working
+
+1. Verify variables are set in Vercel
+2. Check variable names (especially `NEXT_PUBLIC_` prefix)
+3. **Redeploy** after changing variables
+
+### API requests failing
+
+1. Verify `NEXT_PUBLIC_API_URL` is correct
+2. Check backend CORS configuration
+3. Verify backend is accessible from Vercel IPs
+
+### 404 errors
+
+1. Check Next.js routing configuration
+2. Verify `next.config.ts` rewrites
+3. Check file names (must be `page.tsx`)
+
+## Deployment checklist
+
+Before deploying to production:
+
+- [ ] All TypeScript errors fixed (`pnpm typecheck`)
+- [ ] All ESLint errors fixed (`pnpm lint`)
+- [ ] Production build succeeds (`pnpm build`)
+- [ ] Environment variables configured
+- [ ] Backend API accessible
+- [ ] Database migrations run
+- [ ] Custom domain configured
+- [ ] HTTPS enabled
+- [ ] Security headers configured
+- [ ] Analytics enabled
+- [ ] Error tracking configured
+
+See [Architecture](/development/architecture) for understanding the deployment architecture.

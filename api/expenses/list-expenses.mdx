@@ -1,0 +1,254 @@
+---
+title: 'List Expenses'
+description: 'Retrieve a paginated list of expenses with filtering options'
+---
+
+## GET /api/expenses
+
+Retrieves a paginated list of expenses for the authenticated user with support for filtering by profile, date, category, and more.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Query Parameters
+
+<ParamField query="profileId" type="string" optional>
+  Filter expenses by specific profile ID (RFC emisor)
+</ParamField>
+
+<ParamField query="mes" type="number" optional>
+  Filter by month (1-12)
+</ParamField>
+
+<ParamField query="año" type="number" optional>
+  Filter by year (e.g., 2024)
+</ParamField>
+
+<ParamField query="regimen_fiscal" type="string" optional>
+  Filter by fiscal regime
+</ParamField>
+
+<ParamField query="tipo" type="string" optional>
+  Filter by payment type. Options: `PUE`, `PPD`, `COMPLEMENTO_PAGO`
+</ParamField>
+
+<ParamField query="categoria" type="string" optional>
+  Filter by expense category
+</ParamField>
+
+<ParamField query="page" type="number" optional default="1">
+  Page number for pagination
+</ParamField>
+
+<ParamField query="limit" type="number" optional default="20">
+  Number of items per page
+</ParamField>
+
+<ParamField query="search" type="string" optional>
+  Search term to filter expenses by concept, RFC, or name
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="Expense[]">
+  Array of expense objects
+  
+  <Expandable title="Expense Object">
+    <ResponseField name="id" type="string" required>
+      Unique identifier for the expense
+    </ResponseField>
+    
+    <ResponseField name="profile_id" type="string" required>
+      Profile ID associated with this expense
+    </ResponseField>
+    
+    <ResponseField name="tipo_origen" type="string" required>
+      Origin type. Options: `XML`, `MANUAL`
+    </ResponseField>
+    
+    <ResponseField name="fecha" type="string" required>
+      Date of the expense (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="mes" type="number" required>
+      Month of the expense (1-12)
+    </ResponseField>
+    
+    <ResponseField name="año" type="number" required>
+      Year of the expense
+    </ResponseField>
+    
+    <ResponseField name="total" type="number" required>
+      Total amount including taxes
+    </ResponseField>
+    
+    <ResponseField name="subtotal" type="number" required>
+      Subtotal before taxes
+    </ResponseField>
+    
+    <ResponseField name="iva" type="number" required>
+      IVA percentage
+    </ResponseField>
+    
+    <ResponseField name="iva_amount" type="number" optional>
+      IVA amount (transferred tax)
+    </ResponseField>
+    
+    <ResponseField name="retencion_iva_amount" type="number" optional>
+      IVA retention amount
+    </ResponseField>
+    
+    <ResponseField name="retencion_isr_amount" type="number" optional>
+      ISR retention amount
+    </ResponseField>
+    
+    <ResponseField name="is_paid" type="boolean" optional>
+      Payment status
+    </ResponseField>
+    
+    <ResponseField name="payment_date" type="string" optional>
+      Payment date (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="concepto" type="string" optional>
+      Description/concept of the expense
+    </ResponseField>
+    
+    <ResponseField name="categoria" type="string" optional>
+      Category of the expense
+    </ResponseField>
+    
+    <ResponseField name="uuid" type="string" optional>
+      Fiscal UUID from SAT (for XML expenses)
+    </ResponseField>
+    
+    <ResponseField name="tipo" type="string" optional>
+      Payment type: `PUE`, `PPD`, `COMPLEMENTO_PAGO`
+    </ResponseField>
+    
+    <ResponseField name="rfc_emisor" type="string" optional>
+      RFC of the issuer
+    </ResponseField>
+    
+    <ResponseField name="nombre_emisor" type="string" optional>
+      Name of the issuer
+    </ResponseField>
+    
+    <ResponseField name="rfc_receptor" type="string" optional>
+      RFC of the receiver
+    </ResponseField>
+    
+    <ResponseField name="nombre_receptor" type="string" optional>
+      Name of the receiver
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="string" required>
+      Creation timestamp (ISO 8601)
+    </ResponseField>
+    
+    <ResponseField name="updated_at" type="string" required>
+      Last update timestamp (ISO 8601)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object" required>
+  Pagination information
+  
+  <Expandable title="Pagination Object">
+    <ResponseField name="total" type="number" required>
+      Total number of expenses matching the filters
+    </ResponseField>
+    
+    <ResponseField name="page" type="number" required>
+      Current page number
+    </ResponseField>
+    
+    <ResponseField name="limit" type="number" required>
+      Items per page
+    </ResponseField>
+    
+    <ResponseField name="totalPages" type="number" required>
+      Total number of pages
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X GET "https://api.contafy.com/api/expenses?page=1&limit=20&mes=3&año=2024" \
+  -H "Cookie: access_token=your_access_token"
+```
+
+## Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "profile_id": "profile-123",
+      "tipo_origen": "XML",
+      "fecha": "2024-03-15T10:30:00Z",
+      "mes": 3,
+      "año": 2024,
+      "total": 11600,
+      "subtotal": 10000,
+      "iva": 16,
+      "iva_amount": 1600,
+      "is_paid": true,
+      "payment_date": "2024-03-15T10:30:00Z",
+      "concepto": "Servicios de consultoría",
+      "categoria": "Servicios profesionales",
+      "uuid": "12345678-1234-1234-1234-123456789012",
+      "tipo": "PUE",
+      "rfc_emisor": "XAXX010101000",
+      "nombre_emisor": "Proveedor Ejemplo SA de CV",
+      "rfc_receptor": "CACX7605101P8",
+      "nombre_receptor": "Mi Empresa",
+      "created_at": "2024-03-15T10:35:00Z",
+      "updated_at": "2024-03-15T10:35:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 150,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 8
+  }
+}
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request" type="error">
+  Invalid query parameters
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Invalid month value. Must be between 1 and 12"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>

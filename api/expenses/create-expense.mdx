@@ -1,0 +1,198 @@
+---
+title: 'Create Expense'
+description: 'Create a manual expense entry'
+---
+
+## POST /api/accrued-expenses
+
+Creates a new manual expense entry for a specific profile and period. This endpoint is used for expenses that are not imported from XML files.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Request Body
+
+<ParamField body="profile_id" type="string" required>
+  ID of the profile (RFC emisor) to associate this expense with
+</ParamField>
+
+<ParamField body="period_id" type="string" required>
+  ID of the accounting period for this expense
+</ParamField>
+
+<ParamField body="concept" type="string" required>
+  Description or concept of the expense
+</ParamField>
+
+<ParamField body="subtotal" type="number" required>
+  Subtotal amount before taxes
+</ParamField>
+
+<ParamField body="iva_amount" type="number" optional>
+  IVA (VAT) amount. If not provided, defaults to 0
+</ParamField>
+
+<ParamField body="fecha" type="string" required>
+  Date of the expense in ISO 8601 format (e.g., "2024-03-15")
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Type of expense. Must be `manual`
+</ParamField>
+
+<ParamField body="categoria" type="string" optional>
+  Category for organizing the expense
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string" required>
+  Success message
+</ResponseField>
+
+<ResponseField name="data" type="Expense" required>
+  The created expense object
+  
+  <Expandable title="Expense Object">
+    <ResponseField name="id" type="string" required>
+      Unique identifier for the expense
+    </ResponseField>
+    
+    <ResponseField name="profile_id" type="string" required>
+      Profile ID associated with this expense
+    </ResponseField>
+    
+    <ResponseField name="tipo_origen" type="string" required>
+      Origin type. Will be `MANUAL`
+    </ResponseField>
+    
+    <ResponseField name="fecha" type="string" required>
+      Date of the expense (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="mes" type="number" required>
+      Month extracted from fecha (1-12)
+    </ResponseField>
+    
+    <ResponseField name="año" type="number" required>
+      Year extracted from fecha
+    </ResponseField>
+    
+    <ResponseField name="total" type="number" required>
+      Total amount (subtotal + iva_amount)
+    </ResponseField>
+    
+    <ResponseField name="subtotal" type="number" required>
+      Subtotal before taxes
+    </ResponseField>
+    
+    <ResponseField name="iva" type="number" required>
+      IVA percentage calculated from amounts
+    </ResponseField>
+    
+    <ResponseField name="iva_amount" type="number" optional>
+      IVA amount
+    </ResponseField>
+    
+    <ResponseField name="concepto" type="string" required>
+      Description/concept of the expense
+    </ResponseField>
+    
+    <ResponseField name="categoria" type="string" optional>
+      Category of the expense
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="string" required>
+      Creation timestamp (ISO 8601)
+    </ResponseField>
+    
+    <ResponseField name="updated_at" type="string" required>
+      Last update timestamp (ISO 8601)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X POST "https://api.contafy.com/api/accrued-expenses" \
+  -H "Content-Type: application/json" \
+  -H "Cookie: access_token=your_access_token" \
+  -d '{
+    "profile_id": "profile-123",
+    "period_id": "period-456",
+    "concept": "Compra de papelería",
+    "subtotal": 1000,
+    "iva_amount": 160,
+    "fecha": "2024-03-15",
+    "type": "manual",
+    "categoria": "Gastos de oficina"
+  }'
+```
+
+## Example Response
+
+```json
+{
+  "message": "Expense created successfully",
+  "data": {
+    "id": "expense-789",
+    "profile_id": "profile-123",
+    "tipo_origen": "MANUAL",
+    "fecha": "2024-03-15T00:00:00Z",
+    "mes": 3,
+    "año": 2024,
+    "total": 1160,
+    "subtotal": 1000,
+    "iva": 16,
+    "iva_amount": 160,
+    "concepto": "Compra de papelería",
+    "categoria": "Gastos de oficina",
+    "created_at": "2024-03-15T10:30:00Z",
+    "updated_at": "2024-03-15T10:30:00Z"
+  }
+}
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request" type="error">
+  Invalid request body or missing required fields
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Missing required field: concept"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="403 Forbidden" type="error">
+  User does not have permission to create expenses for this profile
+  ```json
+  {
+    "error": "Forbidden",
+    "message": "You do not have permission to access this profile"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>

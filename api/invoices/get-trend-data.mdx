@@ -1,0 +1,194 @@
+---
+title: "Get Trend Data"
+api: "GET /api/trends"
+description: "Retrieve monthly trend data for income and expenses"
+---
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the Authorization header.
+
+```
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+## Query Parameters
+
+<ParamField query="profile_id" type="string">
+  Filter trends by profile ID
+</ParamField>
+
+<ParamField query="año" type="number">
+  Year to retrieve trends for (defaults to current year)
+</ParamField>
+
+<ParamField query="period_view" type="enum" default="año-actual">
+  View mode for the trend data:
+  - `año-actual`: Only the selected year up to the current month (default)
+  - `últimos-12-meses`: Rolling window of the last 12 months
+  - `año-completo`: All 12 months of the selected year
+  - `comparar-anterior`: Current year plus last 3 months of previous year
+</ParamField>
+
+<ParamField query="mes_corte" type="number">
+  Cutoff month (1-12) to limit data up to a specific month. Automatically clamped to current month if in current year.
+</ParamField>
+
+<ParamField query="regimen_fiscal" type="string">
+  Filter by tax regime code
+</ParamField>
+
+## Response
+
+Returns an array of monthly data points:
+
+<ResponseField name="[]" type="array">
+  Array of monthly trend data points
+  
+  <Expandable title="TrendDataPoint">
+    <ResponseField name="mes" type="number">
+      Month number (1-12)
+    </ResponseField>
+    
+    <ResponseField name="año" type="number">
+      Year
+    </ResponseField>
+    
+    <ResponseField name="ingresos_cobrados" type="number">
+      Income collected in this month (cash basis)
+    </ResponseField>
+    
+    <ResponseField name="egresos_pagados" type="number">
+      Expenses paid in this month (cash basis)
+    </ResponseField>
+    
+    <ResponseField name="ingresos_devengados" type="number">
+      Income accrued in this month (accrual basis)
+    </ResponseField>
+    
+    <ResponseField name="egresos_devengados" type="number">
+      Expenses accrued in this month (accrual basis)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Requests
+
+### Get current year trends (default)
+
+```bash
+curl -X GET "https://api.contafy.com/api/trends?profile_id=prof_123" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Get last 12 months rolling window
+
+```bash
+curl -X GET "https://api.contafy.com/api/trends?profile_id=prof_123&period_view=últimos-12-meses" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Get full year with comparison
+
+```bash
+curl -X GET "https://api.contafy.com/api/trends?profile_id=prof_123&año=2026&period_view=comparar-anterior" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Get year up to specific month
+
+```bash
+curl -X GET "https://api.contafy.com/api/trends?profile_id=prof_123&año=2026&mes_corte=6" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+## Example Response
+
+```json
+[
+  {
+    "mes": 1,
+    "año": 2026,
+    "ingresos_cobrados": 120000.00,
+    "egresos_pagados": 70000.00,
+    "ingresos_devengados": 150000.00,
+    "egresos_devengados": 85000.00
+  },
+  {
+    "mes": 2,
+    "año": 2026,
+    "ingresos_cobrados": 135000.00,
+    "egresos_pagados": 75000.00,
+    "ingresos_devengados": 160000.00,
+    "egresos_devengados": 90000.00
+  },
+  {
+    "mes": 3,
+    "año": 2026,
+    "ingresos_cobrados": 150000.00,
+    "egresos_pagados": 80000.00,
+    "ingresos_devengados": 200000.00,
+    "egresos_devengados": 100000.00
+  }
+]
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized">
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Invalid or missing access token"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request">
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Invalid query parameters"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error">
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>
+
+## Period View Modes
+
+### año-actual (Default)
+Returns only the selected year up to the current month (or mes_corte if specified). This is the most common view for tracking year-to-date performance.
+
+**Example**: For March 2026, returns data for January, February, and March 2026 only.
+
+### últimos-12-meses
+Returns a rolling 12-month window ending at the current month. Useful for seeing trends without year boundaries.
+
+**Example**: For March 2026, returns April 2025 through March 2026.
+
+### año-completo
+Returns all 12 months of the selected year, regardless of the current date. Months without data return zero values.
+
+**Example**: Returns January through December of the selected year.
+
+### comparar-anterior
+Returns the current year plus the last 3 months of the previous year for comparison. Only works when viewing the current year.
+
+**Example**: For March 2026, returns October-December 2025 and January-March 2026.
+
+## Notes
+
+- The endpoint aggregates metrics data from multiple months into a single response
+- Data points with no activity will have zero values for all numeric fields
+- Trends use the same cash flow and accrual calculations as the metrics endpoint
+- The response is sorted chronologically (oldest to newest)
+- When using `mes_corte` in the current year, it automatically clamps to the current month
+- Trend data is useful for charts and visualizations showing financial performance over time

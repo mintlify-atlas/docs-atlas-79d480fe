@@ -1,0 +1,287 @@
+---
+title: Expense tracking
+description: Upload CFDI expenses, create manual expenses, and track payment status with automatic categorization
+---
+
+Contafy's expense tracking system handles both XML-based CFDI expenses and manually entered expenses, providing complete visibility into business costs.
+
+## Upload and validation
+
+### Expense sources
+
+Expenses in Contafy can originate from:
+
+- **XML upload** - CFDI expense receipts from suppliers (`tipo_origen: 'XML'`)
+- **Manual entry** - Manually created expense records (`tipo_origen: 'MANUAL'`)
+
+Both types support the same payment tracking and reporting features.
+
+### CFDI expense types
+
+Like invoices, expenses support all Mexican CFDI payment types:
+
+- **PUE** - Paid in full at time of expense
+- **PPD** - Deferred or partial payment
+- **COMPLEMENTO_PAGO** - Payment complements referencing PPD expenses
+
+### Validation process
+
+```typescript
+interface ValidationState {
+  rfcVerificado: boolean;
+  regimenFiscalVerificado: boolean;
+  uuidDuplicado: boolean;
+  advertencias: string[];
+  errores: string[];
+  valido: boolean;
+}
+```
+
+Each uploaded expense XML is validated for:
+
+- RFC matching (receptor should match profile RFC)
+- Tax regime compatibility
+- UUID uniqueness
+- Profile-specific validation rules
+
+<Warning>
+  Expense validation rules mirror invoice validation. If your profile has `bloquearSiRFCNoCoincide` enabled, expenses with mismatched RFCs will be rejected.
+</Warning>
+
+## Manual expense entry
+
+Manual expenses allow you to track costs without formal CFDI receipts.
+
+### Requirements
+
+- A specific profile must be selected (not "Todas las empresas")
+- The period must have a valid period_id
+- Period cannot be "aggregated"
+
+### Manual expense fields
+
+```typescript
+interface CreateAccruedExpenseRequest {
+  profile_id: string;
+  period_id: string;
+  concept: string;
+  subtotal: number;
+  iva_amount?: number;
+  fecha: string;
+  type: 'manual';
+  categoria?: string;
+}
+```
+
+Supported fields:
+
+- **Concept** - Description of the expense
+- **Subtotal** - Base amount before tax
+- **IVA amount** - Value-added tax (optional)
+- **Date** - When the expense occurred
+- **Category** - Optional expense categorization
+
+### Payment status tracking
+
+Manual expenses include payment tracking:
+
+- `is_paid` - Boolean indicating if expense has been paid
+- `payment_date` - Date when expense was paid (nullable)
+
+Users can mark manual expenses as paid through the UI.
+
+<Info>
+  Manual expenses have `uuid: null` and `tipo_origen: 'MANUAL'`. They appear alongside XML-based expenses in the expenses list with a "Manual" badge.
+</Info>
+
+## Automatic payment status
+
+For XML-based expenses, Contafy calculates payment status automatically:
+
+```typescript
+interface EstadoPagoDetalle {
+  estado: 'PAGADO' | 'PAGO_PARCIAL' | 'NO_PAGADO';
+  totalFactura: number;
+  totalPagado: number;
+  saldoPendiente: number;
+  porcentajePagado: number;
+  completamentePagado: boolean;
+  ultimoSaldoInsoluto: number | null;
+  tieneComplementos: boolean;
+  tienePagosManuales: boolean;
+}
+```
+
+The system:
+
+- Links payment complements to parent PPD expenses
+- Calculates cumulative payments
+- Tracks outstanding balance
+- Determines payment percentage
+
+## Expense list interface
+
+### Filtering and search
+
+The expenses page supports:
+
+- **Profile selector** - View specific business or aggregate view
+- **Month/year selection** - Filter by time period
+- **Régimen fiscal filter** - Filter by tax regime
+- **Text search** - Search across expense fields
+- **Pagination** - 10 expenses per page with TanStack Query
+
+### Summary metrics
+
+The expenses page displays:
+
+- **Total expenses** - Count of all expenses in the period
+- **Total egresos devengados** - Sum of accrued expenses
+- **Gastos pendientes de pago** - Count of unpaid/partially paid expenses
+
+<Note>
+  Expense metrics are calculated from the PeriodMetricsResponse which includes both cash flow (pagados) and accrual (devengados) metrics.
+</Note>
+
+### Data table columns
+
+- Date and concept/description
+- Emisor (supplier) information
+- Total amount with tax breakdown
+- Payment type (PUE/PPD/COMPLEMENTO_PAGO)
+- Payment status badge
+- Origin badge (XML or Manual)
+- Actions menu
+
+## Bulk upload
+
+The expense upload interface (`/dashboard/expenses/upload`) provides:
+
+### Upload features
+
+- Drag-and-drop zone for XML files
+- Multiple file selection
+- Profile selection dropdown
+- Upload queue with real-time progress
+- Validation feedback per file
+- "Did You Know" educational cards
+
+### Upload workflow
+
+1. Navigate to "Subir gastos"
+2. Select the profile to associate expenses with
+3. Drop or select expense XML files
+4. Review files in queue
+5. Start upload
+6. View validation results
+
+```typescript
+interface UploadExpenseResponse {
+  message: string;
+  data: Expense;
+  validacion: ValidationState;
+  tipo: 'gasto';
+}
+```
+
+## Tax information extraction
+
+Contafy extracts comprehensive tax data from CFDI expenses:
+
+- **IVA trasladado** (iva_amount) - Input VAT, eligible for credit
+- **Retención IVA** (retencion_iva_amount) - VAT withheld
+- **Retención ISR** (retencion_isr_amount) - Income tax withheld
+
+This data feeds into tax calculations in the metrics and reports.
+
+<Tip>
+  The IVA acreditable (creditable input VAT) shown in dashboard metrics comes from the iva_amount field of expenses. This is crucial for VAT return calculations.
+</Tip>
+
+## Subscription limits
+
+Expense tracking respects subscription plan limits:
+
+- The `ExpensesPageClient` component checks `expensesUsed` against plan limits
+- Users see warnings when approaching limits
+- Upload is restricted when limits are reached
+
+```typescript
+const expensesUsed = expensesQuery.data?.pagination?.total ?? 0;
+```
+
+## Accrued expenses API
+
+Manual expenses use a separate API endpoint (`/api/accrued-expenses`):
+
+- **POST** - Create new manual expense
+- **PUT** - Update manual expense (including payment status)
+- **DELETE** - Remove manual expense
+- **GET** - List manual expenses for a period
+
+### Update example
+
+```typescript
+interface UpdateAccruedExpenseRequest {
+  concept?: string;
+  subtotal?: number;
+  iva_amount?: number;
+  is_paid?: boolean;
+  payment_date?: string | null;
+  categoria?: string | null;
+}
+```
+
+## Related features
+
+<CardGroup cols={2}>
+  <Card title="Dashboard" icon="gauge" href="/features/dashboard">
+    View expense metrics on the main dashboard
+  </Card>
+  <Card title="Multi-Profile" icon="building" href="/features/multi-profile">
+    Track expenses across multiple businesses
+  </Card>
+  <Card title="Reports & Analytics" icon="chart-bar" href="/features/reports-analytics">
+    Generate expense reports and analysis
+  </Card>
+</CardGroup>
+
+## Complete expense data structure
+
+```typescript
+export interface Expense {
+  id: string;
+  profile_id: string;
+  tipo_origen: 'XML' | 'MANUAL';
+  fecha: string;
+  mes: number;
+  año: number;
+  total: number;
+  subtotal: number;
+  iva: number;
+  iva_amount?: number;
+  retencion_iva_amount?: number;
+  retencion_isr_amount?: number;
+  is_paid?: boolean;
+  payment_date?: string | null;
+  concepto: string | null;
+  categoria: string | null;
+  uuid: string | null;
+  tipo: 'PUE' | 'PPD' | 'COMPLEMENTO_PAGO' | null;
+  rfc_emisor: string | null;
+  nombre_emisor: string | null;
+  rfc_receptor: string | null;
+  nombre_receptor: string | null;
+  pagos: Array<...>;
+  complemento_pago: {...} | null;
+  validacion: ValidationState;
+  estadoPago?: EstadoPagoDetalle | null;
+  profile?: {
+    id: string;
+    nombre: string;
+    rfc: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
+```

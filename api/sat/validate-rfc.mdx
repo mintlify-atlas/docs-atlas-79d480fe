@@ -1,0 +1,156 @@
+---
+title: 'Get Fiscal Regimes'
+description: 'Retrieve the catalog of SAT fiscal regimes'
+---
+
+## GET /api/sat/regimenes-fiscales
+
+Retrieves the catalog of fiscal regimes (Régimen Fiscal) from SAT. This catalog is used when creating or updating profiles and invoices to ensure compliance with Mexican tax regulations.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Query Parameters
+
+<ParamField query="tipo_persona" type="string" optional>
+  Filter by person type. Options: `FISICA`, `MORAL`
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="RegimenFiscalItem[]" required>
+  Array of fiscal regime objects
+  
+  <Expandable title="Fiscal Regime Object">
+    <ResponseField name="clave" type="string" required>
+      Fiscal regime code (e.g., "601", "612")
+    </ResponseField>
+    
+    <ResponseField name="descripcion" type="string" required>
+      Description of the fiscal regime
+    </ResponseField>
+    
+    <ResponseField name="aplica_persona_fisica" type="boolean" required>
+      Whether this regime applies to individuals (Persona Física)
+    </ResponseField>
+    
+    <ResponseField name="aplica_persona_moral" type="boolean" required>
+      Whether this regime applies to legal entities (Persona Moral)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X GET "https://api.contafy.com/api/sat/regimenes-fiscales?tipo_persona=FISICA" \
+  -H "Cookie: access_token=your_access_token"
+```
+
+## Example Response
+
+```json
+{
+  "data": [
+    {
+      "clave": "605",
+      "descripcion": "Sueldos y Salarios e Ingresos Asimilados a Salarios",
+      "aplica_persona_fisica": true,
+      "aplica_persona_moral": false
+    },
+    {
+      "clave": "606",
+      "descripcion": "Arrendamiento",
+      "aplica_persona_fisica": true,
+      "aplica_persona_moral": false
+    },
+    {
+      "clave": "612",
+      "descripcion": "Personas Físicas con Actividades Empresariales y Profesionales",
+      "aplica_persona_fisica": true,
+      "aplica_persona_moral": false
+    },
+    {
+      "clave": "621",
+      "descripcion": "Incorporación Fiscal",
+      "aplica_persona_fisica": true,
+      "aplica_persona_moral": false
+    },
+    {
+      "clave": "625",
+      "descripcion": "Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas",
+      "aplica_persona_fisica": true,
+      "aplica_persona_moral": false
+    },
+    {
+      "clave": "626",
+      "descripcion": "Régimen Simplificado de Confianza",
+      "aplica_persona_fisica": true,
+      "aplica_persona_moral": true
+    }
+  ]
+}
+```
+
+## Common Fiscal Regimes
+
+### For Persona Física (Individuals)
+- **601**: General de Ley Personas Morales
+- **605**: Sueldos y Salarios e Ingresos Asimilados a Salarios
+- **606**: Arrendamiento
+- **612**: Personas Físicas con Actividades Empresariales y Profesionales
+- **621**: Incorporación Fiscal
+- **626**: Régimen Simplificado de Confianza
+
+### For Persona Moral (Legal Entities)
+- **601**: General de Ley Personas Morales
+- **603**: Personas Morales con Fines no Lucrativos
+- **626**: Régimen Simplificado de Confianza
+
+## Use Cases
+
+- Populate regime dropdown when creating profiles
+- Validate fiscal regime codes in invoices
+- Filter available regimes based on person type
+- Display regime information in user interfaces
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request" type="error">
+  Invalid tipo_persona parameter
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Invalid tipo_persona. Must be FISICA or MORAL"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>
+
+<Note>
+  This catalog is based on the official SAT c_RegimenFiscal catalog and is updated periodically to reflect changes in Mexican tax law.
+</Note>
+
+<Tip>
+  When creating a profile, always validate that the selected fiscal regime is appropriate for the person type (física or moral).
+</Tip>

@@ -1,0 +1,107 @@
+---
+title: 'Create Portal Session'
+description: 'Create a Stripe Customer Portal session'
+---
+
+## POST /api/subscription/create-portal-session
+
+Creates a Stripe Customer Portal session where users can manage their subscription, update payment methods, view invoices, and cancel their subscription. Only available for users with paid plans (BASIC or PRO).
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Response
+
+<ResponseField name="url" type="string" required>
+  URL to redirect the user to the Stripe Customer Portal
+</ResponseField>
+
+<ResponseField name="message" type="string" required>
+  Success message
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X POST "https://api.contafy.com/api/subscription/create-portal-session" \
+  -H "Cookie: access_token=your_access_token"
+```
+
+## Example Response
+
+```json
+{
+  "url": "https://billing.stripe.com/p/session/test_YWNjdF8xMjM0NTY3ODk",
+  "message": "Portal session created successfully"
+}
+```
+
+## Customer Portal Features
+
+The Stripe Customer Portal allows users to:
+
+- View current subscription details
+- Update payment methods
+- View billing history and download invoices
+- Change subscription plan
+- Cancel subscription
+- Update billing information
+
+## Usage Flow
+
+1. Call this endpoint to create a portal session
+2. Redirect the user to the returned `url`
+3. User manages their subscription on Stripe's hosted portal
+4. User is redirected back to your return URL
+5. Stripe webhooks update subscription changes automatically
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="403 Forbidden" type="error">
+  User does not have a paid subscription
+  ```json
+  {
+    "error": "Forbidden",
+    "message": "Customer portal is only available for paid subscriptions"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="404 Not Found" type="error">
+  Stripe customer not found
+  ```json
+  {
+    "error": "Not Found",
+    "message": "Stripe customer not found"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server or Stripe error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "Failed to create portal session"
+  }
+  ```
+</ResponseField>
+
+<Warning>
+  This endpoint is only available for users with BASIC or PRO subscriptions. FREE plan users will receive a 403 Forbidden error.
+</Warning>
+
+<Note>
+  The portal session URL is single-use and expires after the user leaves the portal or after a certain period of inactivity.
+</Note>

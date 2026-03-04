@@ -1,0 +1,374 @@
+---
+title: Architecture
+description: Overall system architecture and design patterns used in Contafy
+---
+
+Contafy is built as a modern Next.js application using the App Router architecture with a clear separation between server and client components.
+
+## System overview
+
+The application follows a **hybrid rendering strategy** that combines:
+
+- **Server-side rendering (SSR)** for initial page loads and data fetching
+- **Client-side interactivity** for dynamic features and real-time updates
+- **Static optimization** where applicable for improved performance
+
+This approach provides optimal performance while maintaining rich user interactions.
+
+## Next.js App Router architecture
+
+Contafy leverages Next.js 16's App Router, which provides:
+
+### File-based routing
+
+Routes are defined by the folder structure in the `app/` directory:
+
+```
+app/
+├── auth/
+│   ├── login/page.tsx
+│   ├── register/page.tsx
+│   ├── forgot-password/page.tsx
+│   └── verify-email/page.tsx
+├── dashboard/
+│   ├── page.tsx
+│   ├── invoices/page.tsx
+│   ├── expenses/page.tsx
+│   └── reporte/page.tsx
+├── subscription/
+│   ├── success/page.tsx
+│   └── cancel/page.tsx
+└── page.tsx
+```
+
+Each `page.tsx` file represents a route endpoint that is automatically mapped to a URL.
+
+### Layout composition
+
+Layouts provide shared UI across multiple pages:
+
+- **Root layout** (`app/layout.tsx`): Wraps the entire application with providers and global UI
+- **Route-specific layouts**: Can be nested to provide section-specific UI
+
+The root layout sets up:
+
+- Font loading (Geist Sans and Geist Mono)
+- Global providers (ReactQueryProvider, TokenRefresher)
+- Toast notifications (Sonner)
+- Dark theme by default
+
+### Server vs Client components
+
+Contafy follows a **Server Components first** approach:
+
+#### Server Components (default)
+
+Server Components are the default in Next.js App Router and are used for:
+
+- Initial data fetching (see `app/dashboard/page.tsx:17-31`)
+- Direct database/API access
+- Rendering static content
+- SEO-optimized pages
+
+**Benefits:**
+
+- Zero JavaScript sent to the client
+- Direct access to backend resources
+- Automatic code splitting
+- Improved performance
+
+**Example from `app/dashboard/components/DashboardContent.tsx:42-57`:**
+
+```tsx
+export async function DashboardContent({ profileId, mes, año, regimenFiscal }) {
+  // Server Component can await data directly
+  const [metrics, invoices, expenses, profiles, trendData, currentUser] = await Promise.all([
+    getMetrics(profileId, mes, año, regimenFiscal),
+    getInvoices({ profileId, mes, año, regimen_fiscal: regimenFiscal, limit: 3 }),
+    getExpenses({ profileId, mes, año, regimen_fiscal: regimenFiscal, limit: 3 }),
+    getProfiles(),
+    getTrendData(profileId, año, 'año-actual', mes, regimenFiscal),
+    getCurrentUser(),
+  ]);
+
+  return (
+    // Render with fetched data
+  );
+}
+```
+
+#### Client Components ('use client')
+
+Client Components are used sparingly, only when needed for:
+
+- Interactive UI (forms, modals, dropdowns)
+- Browser APIs (localStorage, window)
+- React hooks (useState, useEffect, useQuery)
+- Event handlers (onClick, onChange)
+
+**Example from `app/dashboard/expenses/components/ExpensesListContent.tsx:1-5`:**
+
+```tsx
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+import { useRouter, useSearchParams } from 'next/navigation';
+// Component uses client-side state and interactivity
+```
+
+### Dynamic segments and search params
+
+Contafy uses URL search parameters for filtering and pagination:
+
+```tsx
+interface DashboardPageProps {
+  searchParams?: Promise<{
+    profileId?: string;
+    mes?: string;
+    año?: string;
+    regimen_fiscal?: string;
+  }>;
+}
+```
+
+This allows for shareable URLs and browser history support.
+
+## State management
+
+### Server state with TanStack Query
+
+TanStack Query (React Query) manages server state in Client Components:
+
+- **Automatic caching**: Reduces unnecessary API calls
+- **Background refetching**: Keeps data fresh
+- **Optimistic updates**: Immediate UI feedback
+- **Request deduplication**: Prevents duplicate requests
+
+Configuration is set in `components/providers/ReactQueryProvider.tsx:14-17`:
+
+```tsx
+new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+})
+```
+
+### Local state with React hooks
+
+Simple component state uses standard React hooks:
+
+- `useState` for local component state
+- `useEffect` for side effects
+- `useCallback` for memoized callbacks
+- `useMemo` for computed values
+
+### URL state
+
+URL search parameters serve as a source of truth for:
+
+- Current selected profile
+- Date filters (month/year)
+- Pagination state
+- Search queries
+
+This provides:
+
+- Shareable links
+- Browser back/forward support
+- Deep linking capability
+
+## Authentication architecture
+
+Contafy uses JWT-based authentication with httpOnly cookies:
+
+### Token storage
+
+- **Access token**: Short-lived (stored in httpOnly cookie)
+- **Refresh token**: Long-lived (stored in httpOnly cookie)
+
+HttpOnly cookies prevent XSS attacks by making tokens inaccessible to JavaScript.
+
+### Token refresh mechanism
+
+The `lib/api/client.ts:49-95` implements automatic token refresh:
+
+1. Client makes authenticated request
+2. If 401 received, automatically call refresh endpoint
+3. Retry original request with new token
+4. If refresh fails, redirect to login
+
+This happens transparently without user interaction.
+
+### Server vs Client authentication
+
+**Server Components** (`lib/api/server-client.ts`):
+
+- Read token from cookies directly
+- Cannot refresh tokens (can't modify cookies)
+- Redirect to login on 401
+
+**Client Components** (`lib/api/client.ts`):
+
+- Request token via API route
+- Can refresh tokens automatically
+- Handle 401 with retry logic
+
+## API client architecture
+
+Contafy has separate API clients for server and client contexts:
+
+### Server API client
+
+Used in Server Components (`lib/api/server-client.ts:37-86`):
+
+```tsx
+export async function serverApiClient<T>(endpoint: string, options?) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+  
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+    },
+  });
+  
+  // Handle 401 by redirecting to login
+  if (response.status === 401) {
+    redirect('/auth/login');
+  }
+  
+  return data;
+}
+```
+
+### Client API client
+
+Used in Client Components (`lib/api/client.ts:97-186`):
+
+```tsx
+export async function apiClient<T>(endpoint: string, options?) {
+  // Uses /backend proxy to avoid CORS issues
+  const apiUrl = typeof window !== 'undefined' 
+    ? '/backend'
+    : process.env.NEXT_PUBLIC_API_URL;
+  
+  // Automatic token refresh on 401
+  if (response.status === 401 && !options?.skipAuthRetry) {
+    const newAccessToken = await refreshAccessToken();
+    // Retry with new token
+  }
+  
+  return data;
+}
+```
+
+### API proxy
+
+The `next.config.ts:5-12` configures a proxy to avoid CORS:
+
+```tsx
+async rewrites() {
+  return [
+    {
+      source: '/backend/:path*',
+      destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+    },
+  ];
+}
+```
+
+## Component composition pattern
+
+Contafy follows the **Container/Presentational** pattern:
+
+### Page as orchestrator
+
+Pages (`page.tsx`) act as "scriptwriters" with minimal logic:
+
+```tsx
+export default async function DashboardPage({ searchParams }) {
+  // Parse params
+  const params = await searchParams;
+  const mes = params?.mes ? Number(params.mes) : new Date().getMonth() + 1;
+  
+  // Delegate to content component
+  return <DashboardContent mes={mes} año={año} />;
+}
+```
+
+### Content components
+
+Content components handle data fetching and composition:
+
+- Fetch data (Server Components) or manage queries (Client Components)
+- Compose UI from smaller presentational components
+- Handle loading and error states
+
+### Presentational components
+
+Small, focused components in `app/[route]/components/`:
+
+- Accept data via props
+- No data fetching
+- Reusable and testable
+- Pure presentation logic
+
+## Performance optimizations
+
+### Dynamic imports
+
+Heavy components are lazy-loaded (`app/dashboard/components/DashboardContent.tsx:17-32`):
+
+```tsx
+const FlowTrendChart = dynamic(
+  () => import('./FlowTrendChart'),
+  { loading: () => <LoadingSpinner /> }
+);
+```
+
+### Parallel data fetching
+
+Server Components fetch data in parallel with `Promise.all()`:
+
+```tsx
+const [metrics, invoices, expenses] = await Promise.all([
+  getMetrics(),
+  getInvoices(),
+  getExpenses(),
+]);
+```
+
+### Suspense boundaries
+
+Suspense provides granular loading states:
+
+```tsx
+<Suspense fallback={<LoadingSpinner />}>
+  <FlowTrendChart />
+</Suspense>
+```
+
+## Error handling
+
+Contafy implements error handling at multiple levels:
+
+1. **API level**: `ApiError` class with status codes
+2. **Component level**: Try-catch in async functions
+3. **Route level**: `error.tsx` for route-level errors
+4. **Global level**: `app/error.tsx` for uncaught errors
+
+## Type safety
+
+TypeScript strict mode ensures type safety throughout:
+
+- All API responses have defined types (`lib/types/`)
+- Component props are fully typed
+- No usage of `any` type
+- Path aliases configured (`@/*` → project root)
+
+See [Tech Stack](/development/tech-stack) for more details on the technologies used.

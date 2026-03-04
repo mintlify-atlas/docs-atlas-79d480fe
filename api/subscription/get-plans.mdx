@@ -1,0 +1,178 @@
+---
+title: 'Get Plans'
+description: 'Retrieve available subscription plans'
+---
+
+## GET /api/subscription/plans
+
+Retrieves all available subscription plans with their pricing, limits, and features. Requires authentication to return plans.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Query Parameters
+
+<ParamField query="billing" type="string" optional default="monthly">
+  Billing period for pricing. Options: `monthly`, `annual`
+</ParamField>
+
+## Response
+
+<ResponseField name="plans" type="AvailablePlan[]" required>
+  Array of available plan objects
+  
+  <Expandable title="AvailablePlan Object">
+    <ResponseField name="id" type="string" required>
+      Plan identifier. Options: `FREE`, `BASIC`, `PRO`, `ENTERPRISE`
+    </ResponseField>
+    
+    <ResponseField name="name" type="string" required>
+      Display name of the plan
+    </ResponseField>
+    
+    <ResponseField name="price" type="number" required>
+      Price according to the selected billing period
+    </ResponseField>
+    
+    <ResponseField name="originalPrice" type="number" optional>
+      Original price before discount (only for annual billing). Null for monthly
+    </ResponseField>
+    
+    <ResponseField name="billing" type="string" required>
+      Billing period. Options: `monthly`, `annual`
+    </ResponseField>
+    
+    <ResponseField name="limits" type="object" required>
+      Plan limits and features (same structure as subscription limits)
+    </ResponseField>
+    
+    <ResponseField name="trialDays" type="number" optional>
+      Number of trial days available. Only applicable to BASIC and PRO plans
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="billing" type="string" required>
+  Billing period used for the response. Options: `monthly`, `annual`
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X GET "https://api.contafy.com/api/subscription/plans?billing=annual" \
+  -H "Cookie: access_token=your_access_token"
+```
+
+## Example Response
+
+```json
+{
+  "plans": [
+    {
+      "id": "FREE",
+      "name": "FREE",
+      "price": 0,
+      "originalPrice": null,
+      "billing": "annual",
+      "limits": {
+        "profiles": 1,
+        "invoicesPerMonth": 50,
+        "expensesPerMonth": 50,
+        "exportPDF": false,
+        "exportExcel": false,
+        "reports": "basic",
+        "support": "none",
+        "apiAccess": false,
+        "satBasicSearchesPerMonth": 10,
+        "satAISearchesPerMonth": 0,
+        "satMaxResults": 10
+      },
+      "trialDays": null
+    },
+    {
+      "id": "BASIC",
+      "name": "BASIC",
+      "price": 2990,
+      "originalPrice": 3588,
+      "billing": "annual",
+      "limits": {
+        "profiles": 3,
+        "invoicesPerMonth": 200,
+        "expensesPerMonth": 200,
+        "exportPDF": true,
+        "exportExcel": true,
+        "reports": "complete",
+        "support": "email",
+        "apiAccess": true,
+        "satBasicSearchesPerMonth": 100,
+        "satAISearchesPerMonth": 50,
+        "satMaxResults": 50
+      },
+      "trialDays": 14
+    },
+    {
+      "id": "PRO",
+      "name": "PRO",
+      "price": 5990,
+      "originalPrice": 7188,
+      "billing": "annual",
+      "limits": {
+        "profiles": null,
+        "invoicesPerMonth": null,
+        "expensesPerMonth": null,
+        "exportPDF": true,
+        "exportExcel": true,
+        "reports": "advanced",
+        "support": "priority",
+        "apiAccess": true,
+        "satBasicSearchesPerMonth": null,
+        "satAISearchesPerMonth": 500,
+        "satMaxResults": null,
+        "satHasAIExplanations": true,
+        "satHasHistory": true,
+        "satHasFavorites": true,
+        "satHasAlerts": true
+      },
+      "trialDays": 14
+    }
+  ],
+  "billing": "annual"
+}
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request" type="error">
+  Invalid billing parameter
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Invalid billing period. Must be 'monthly' or 'annual'"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>
+
+<Note>
+  Annual billing typically includes a discount compared to monthly billing. The `originalPrice` field shows the equivalent monthly cost over a year.
+</Note>

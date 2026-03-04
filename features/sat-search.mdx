@@ -1,0 +1,296 @@
+---
+title: SAT search
+description: AI-powered search for Mexican SAT product and service codes (Clave de Producto/Servicio)
+---
+
+Contafy's SAT Search feature helps you find the correct SAT product/service code (Clave de Producto/Servicio) for your invoicing needs using natural language queries powered by artificial intelligence.
+
+## What is a SAT code?
+
+In Mexico, every invoice (CFDI) must include a product/service code from the official SAT catalog. These codes identify what's being invoiced and determine tax treatment.
+
+The SAT catalog (`c_ClaveProdServ`) contains thousands of codes with specific attributes:
+
+```typescript
+export interface SATProductServiceAttributes {
+  id: string;                              // Clave SAT (e.g., "80141600")
+  descripcion: string;                     // Description
+  incluir_iva_trasladado: "Sí" | "No" | "Opcional";
+  incluir_ieps_trasladado: "Sí" | "No" | "Opcional";
+  complemento_que_debe_incluir: string | null;
+  fecha_inicio_vigencia: string;
+  fecha_fin_vigencia: string | null;
+  estimulo_franja_fronteriza: string;
+  palabras_similares: string | null;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+<Info>
+  SAT codes indicate whether VAT (IVA) and excise tax (IEPS) should be included. This is critical for proper tax calculation and compliance.
+</Info>
+
+## How SAT search works
+
+### Natural language input
+
+Instead of browsing through thousands of codes, you describe your activity in plain Spanish:
+
+- "Venta de calzado deportivo"
+- "Servicios de limpieza de oficinas"
+- "Diseño gráfico publicitario"
+
+The system uses AI to understand your query and find matching codes.
+
+### AI-enhanced search
+
+The search process involves:
+
+1. **User query analysis** - GPT-4o-mini interprets your natural language description
+2. **Search term extraction** - AI identifies relevant keywords and synonyms
+3. **Similarity matching** - Vector similarity search against SAT catalog
+4. **Ranking and filtering** - Results ordered by relevance
+5. **Confidence scoring** - AI assigns confidence level (high/medium/low)
+
+```typescript
+export interface AISearchResponse {
+  searchTerms: string[];
+  explanation: string;
+  suggestedFilters?: {
+    incluir_iva_trasladado?: "Sí" | "No" | "Opcional" | null;
+    incluir_ieps_trasladado?: "Sí" | "No" | "Opcional" | null;
+  };
+  confidence: "high" | "medium" | "low";
+}
+```
+
+<Note>
+  The AI explanation appears in the results card, helping you understand why specific codes were suggested and how they relate to your query.
+</Note>
+
+## Plan limits
+
+AI-enhanced searches are limited by subscription plan:
+
+```typescript
+export interface SATPlanInfo {
+  maxResults: number | null;           // Max results per search
+  aiSearchesRemaining: number | null;  // Searches left this month
+  aiSearchesLimit: number | null;      // Total searches per month
+  aiSearchesUsed: number;              // Searches used this month
+  hasAIExplanations: boolean;          // Show AI analysis
+  hasHistory: boolean;                 // Save search history
+  hasFavorites: boolean;               // Save favorite codes
+  hasAlerts: boolean;                  // Notify on catalog updates
+  hasLearning: boolean;                // Personalized suggestions
+  hasAdvancedRanking: boolean;         // Better result ordering
+}
+```
+
+### Plan tiers
+
+- **FREE** - Limited AI searches per month, basic features
+- **BASIC** - More AI searches, AI explanations enabled
+- **PREMIUM** - High search limit, all features unlocked
+- **ENTERPRISE** - Unlimited searches (aiSearchesLimit: null)
+
+<Warning>
+  When you reach your plan's AI search limit, the search button is disabled and you'll see an upgrade prompt. Your search count resets at the start of each billing cycle.
+</Warning>
+
+## Using the search interface
+
+### Search bar
+
+The main search bar (`/dashboard/sat-search`) includes:
+
+- Text input for natural language queries
+- Real-time search counter showing remaining searches
+- AI badge indicating GPT-4o-mini powered search
+- Disabled state when limit reached
+
+### Suggestions
+
+Before searching, common suggestion chips help you get started:
+
+```typescript
+const SUGGESTIONS = [
+  'Venta de calzado deportivo',
+  'Servicios de limpieza de oficinas',
+  'Diseño gráfico publicitario',
+];
+```
+
+Click any suggestion to run that search instantly.
+
+### Results display
+
+Search results show:
+
+- **Clave SAT** - The numeric code (e.g., 80141600)
+- **Descripción** - Official SAT description
+- **IVA trasladado** - Whether VAT applies (Sí/No/Opcional)
+- **IEPS trasladado** - Whether excise tax applies
+- **Vigencia** - Validity period (start and end dates)
+
+Results are paginated (5 per page by default, respects plan limits).
+
+<Tip>
+  Pay attention to the "incluir_iva_trasladado" field. If it says "Sí", you must charge VAT when using this code on invoices. "Opcional" means VAT depends on your business.
+</Tip>
+
+## AI explanation card
+
+When AI explanations are enabled (BASIC plan and above), you'll see:
+
+```typescript
+interface SATSearchContent {
+  aiExplanation?: string;
+  confidence?: "high" | "medium" | "low";
+}
+```
+
+The explanation card displays:
+
+- **IA (GPT-4o-mini) badge** - Shows AI is active
+- **Confidence badge** - Color-coded confidence level
+  - Green (high) - AI is very confident in the results
+  - Yellow (medium) - Results are likely correct
+  - Gray (low) - Manual verification recommended
+- **Analysis text** - Explains reasoning behind results
+
+## Search state management
+
+The search component uses React state:
+
+```typescript
+const [searchQuery, setSearchQuery] = useState('');
+const [results, setResults] = useState<SATProductServiceAttributes[]>([]);
+const [isSearching, setIsSearching] = useState(false);
+const [aiExplanation, setAiExplanation] = useState<string | undefined>();
+const [confidence, setConfidence] = useState<'high' | 'medium' | 'low' | undefined>();
+const [planInfo, setPlanInfo] = useState<SATPlanInfo | null>(null);
+const [limitReached, setLimitReached] = useState(false);
+```
+
+The search flow:
+
+1. Check if AI searches remaining > 0
+2. If limit reached, show upgrade modal
+3. If available, call `searchSATWithAI(query)` server action
+4. Display results with AI explanation
+5. Update remaining count
+
+## Server action
+
+Search is powered by a server action:
+
+```typescript
+export async function searchSATWithAI(userQuery: string): Promise<SearchSATResult> {
+  // Calls OpenAI GPT-4o-mini to analyze query
+  // Performs similarity search against SAT catalog
+  // Returns ranked results with explanation
+}
+```
+
+The action handles:
+- Subscription limit checking
+- AI query analysis
+- Database similarity search
+- Usage tracking
+- Error handling
+
+<Info>
+  The SAT search uses PostgreSQL's vector similarity features (pgvector) for efficient semantic search across thousands of product codes.
+</Info>
+
+## Limit reached handling
+
+When you've used all AI searches:
+
+```typescript
+if (planInfo?.aiSearchesRemaining === 0 || limitReached) {
+  setUpgradeModalMessage(LIMIT_REACHED_MESSAGE);
+  setShowUpgradeModal(true);
+  return;
+}
+```
+
+The upgrade modal appears with:
+- Current plan badge
+- Feature description
+- Recommended upgrade plan
+- Direct link to subscription management
+
+## Result pagination
+
+Results are paginated to improve performance:
+
+```typescript
+const RESULTS_PER_PAGE = 5;
+const resultsPerPage = Math.min(RESULTS_PER_PAGE, planInfo?.maxResults ?? RESULTS_PER_PAGE);
+const totalPages = Math.ceil(results.length / resultsPerPage);
+```
+
+- Navigate with previous/next buttons
+- Click page numbers to jump
+- Pagination respects plan's maxResults setting
+
+## Edge cases
+
+### No results
+
+If the AI finds no matching codes:
+
+```typescript
+if (results.length === 0) {
+  return (
+    <div className="rounded-lg border p-8 text-center">
+      <p>No se encontraron resultados para tu búsqueda. Intenta con otros términos.</p>
+    </div>
+  );
+}
+```
+
+Try rephrasing your query or using more specific terms.
+
+### Invalid vigencia
+
+Some SAT codes have expiration dates (`fecha_fin_vigencia`). Check the vigencia field to ensure the code is currently valid.
+
+### Special requirements
+
+The `complemento_que_debe_incluir` field indicates if the code requires a specific invoice complement (special XML sections). This is important for certain industries.
+
+## Related features
+
+<CardGroup cols={2}>
+  <Card title="Invoice Management" icon="file-text" href="/features/invoice-management">
+    Use SAT codes when creating invoices
+  </Card>
+  <Card title="Dashboard" icon="gauge" href="/features/dashboard">
+    Return to main dashboard
+  </Card>
+</CardGroup>
+
+## API endpoints
+
+The SAT search uses these API routes:
+
+- **GET /api/sat/stats** - Returns plan limits and usage
+- **POST /api/sat/search** - Performs AI-enhanced search
+- **GET /api/sat/similarity** - Finds similar codes
+- **GET /api/sat/regimenes-fiscales** - Returns tax regime catalog
+
+## Technical implementation
+
+Key files:
+
+- `app/dashboard/sat-search/page.tsx` - Main search page
+- `app/dashboard/sat-search/components/SATSearchContent.tsx` - Search UI logic
+- `app/dashboard/sat-search/components/SATSearchBar.tsx` - Search input component
+- `app/dashboard/sat-search/components/SATSearchResults.tsx` - Results display
+- `app/dashboard/sat-search/actions.ts` - Server actions for search
+- `lib/types/sat.ts` - TypeScript types for SAT data
+- `lib/api/sat.client.ts` - Client-side API calls

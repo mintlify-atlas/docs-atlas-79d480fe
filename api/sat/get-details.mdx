@@ -1,0 +1,142 @@
+---
+title: 'Get SAT Product Details'
+description: 'Retrieve detailed information for a specific SAT product/service'
+---
+
+## GET /api/sat/:id
+
+Retrieves complete details for a specific SAT product or service by its code. Use this endpoint to get full information about a product/service identified during search.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  SAT product/service code (e.g., "80141600")
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string" required>
+  SAT product/service code
+</ResponseField>
+
+<ResponseField name="descripcion" type="string" required>
+  Description of the product or service
+</ResponseField>
+
+<ResponseField name="incluir_iva_trasladado" type="string" required>
+  IVA requirement. Options: `Sí`, `No`, `Opcional`
+</ResponseField>
+
+<ResponseField name="incluir_ieps_trasladado" type="string" required>
+  IEPS requirement. Options: `Sí`, `No`, `Opcional`
+</ResponseField>
+
+<ResponseField name="complemento_que_debe_incluir" type="string" optional>
+  Required complement for invoicing. Null if none required
+</ResponseField>
+
+<ResponseField name="fecha_inicio_vigencia" type="string" required>
+  Start date of validity (ISO 8601 format)
+</ResponseField>
+
+<ResponseField name="fecha_fin_vigencia" type="string" optional>
+  End date of validity (ISO 8601 format). Null if still valid
+</ResponseField>
+
+<ResponseField name="estimulo_franja_fronteriza" type="string" required>
+  Border zone stimulus information
+</ResponseField>
+
+<ResponseField name="palabras_similares" type="string" optional>
+  Similar keywords for search optimization. Null if none
+</ResponseField>
+
+<ResponseField name="created_at" type="string" required>
+  Record creation timestamp (ISO 8601 format)
+</ResponseField>
+
+<ResponseField name="updated_at" type="string" required>
+  Record last update timestamp (ISO 8601 format)
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X GET "https://api.contafy.com/api/sat/80141600" \
+  -H "Cookie: access_token=your_access_token"
+```
+
+## Example Response
+
+```json
+{
+  "id": "80141600",
+  "descripcion": "Servicios de consultoría de negocios y administración corporativa",
+  "incluir_iva_trasladado": "Sí",
+  "incluir_ieps_trasladado": "No",
+  "complemento_que_debe_incluir": null,
+  "fecha_inicio_vigencia": "2017-01-01T00:00:00Z",
+  "fecha_fin_vigencia": null,
+  "estimulo_franja_fronteriza": "No aplica",
+  "palabras_similares": "consultoría empresarial asesoría negocios administración",
+  "created_at": "2023-01-15T10:00:00Z",
+  "updated_at": "2023-01-15T10:00:00Z"
+}
+```
+
+## Use Cases
+
+- Retrieve full details after selecting from search results
+- Verify product/service information before creating an invoice
+- Display complete tax requirements for a specific code
+- Validate that a product/service code is still valid
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="404 Not Found" type="error">
+  SAT product/service code not found
+  ```json
+  {
+    "error": "Not Found",
+    "message": "SAT product/service not found"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request" type="error">
+  Invalid product/service code format
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Invalid SAT product/service code format"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>
+
+<Tip>
+  Check the `fecha_fin_vigencia` field. If null, the product/service is currently valid. If it has a date, verify it hasn't expired.
+</Tip>

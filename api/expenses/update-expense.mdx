@@ -1,0 +1,200 @@
+---
+title: 'Update Expense'
+description: 'Update an existing manual expense'
+---
+
+## PUT /api/accrued-expenses/:id
+
+Updates an existing manual expense. Only expenses with `tipo_origen: MANUAL` can be updated. XML-imported expenses cannot be modified.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier of the expense to update
+</ParamField>
+
+## Request Body
+
+All fields are optional. Only include fields you want to update.
+
+<ParamField body="concept" type="string" optional>
+  Updated description or concept of the expense
+</ParamField>
+
+<ParamField body="subtotal" type="number" optional>
+  Updated subtotal amount before taxes
+</ParamField>
+
+<ParamField body="iva_amount" type="number" optional>
+  Updated IVA (VAT) amount
+</ParamField>
+
+<ParamField body="is_paid" type="boolean" optional>
+  Payment status of the expense
+</ParamField>
+
+<ParamField body="payment_date" type="string" optional>
+  Payment date in ISO 8601 format. Set to `null` to clear the payment date
+</ParamField>
+
+<ParamField body="categoria" type="string" optional>
+  Updated category. Set to `null` to clear the category
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string" required>
+  Success message
+</ResponseField>
+
+<ResponseField name="data" type="Expense" required>
+  The updated expense object
+  
+  <Expandable title="Expense Object">
+    <ResponseField name="id" type="string" required>
+      Unique identifier for the expense
+    </ResponseField>
+    
+    <ResponseField name="profile_id" type="string" required>
+      Profile ID associated with this expense
+    </ResponseField>
+    
+    <ResponseField name="tipo_origen" type="string" required>
+      Origin type. Will be `MANUAL`
+    </ResponseField>
+    
+    <ResponseField name="fecha" type="string" required>
+      Date of the expense (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="total" type="number" required>
+      Total amount (subtotal + iva_amount)
+    </ResponseField>
+    
+    <ResponseField name="subtotal" type="number" required>
+      Subtotal before taxes
+    </ResponseField>
+    
+    <ResponseField name="iva_amount" type="number" optional>
+      IVA amount
+    </ResponseField>
+    
+    <ResponseField name="is_paid" type="boolean" optional>
+      Payment status
+    </ResponseField>
+    
+    <ResponseField name="payment_date" type="string" optional>
+      Payment date (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="concepto" type="string" required>
+      Description/concept of the expense
+    </ResponseField>
+    
+    <ResponseField name="categoria" type="string" optional>
+      Category of the expense
+    </ResponseField>
+    
+    <ResponseField name="updated_at" type="string" required>
+      Last update timestamp (ISO 8601)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X PUT "https://api.contafy.com/api/accrued-expenses/expense-789" \
+  -H "Content-Type: application/json" \
+  -H "Cookie: access_token=your_access_token" \
+  -d '{
+    "concept": "Compra de papelería y suministros",
+    "subtotal": 1200,
+    "iva_amount": 192,
+    "is_paid": true,
+    "payment_date": "2024-03-20",
+    "categoria": "Gastos de oficina"
+  }'
+```
+
+## Example Response
+
+```json
+{
+  "message": "Expense updated successfully",
+  "data": {
+    "id": "expense-789",
+    "profile_id": "profile-123",
+    "tipo_origen": "MANUAL",
+    "fecha": "2024-03-15T00:00:00Z",
+    "mes": 3,
+    "año": 2024,
+    "total": 1392,
+    "subtotal": 1200,
+    "iva": 16,
+    "iva_amount": 192,
+    "is_paid": true,
+    "payment_date": "2024-03-20T00:00:00Z",
+    "concepto": "Compra de papelería y suministros",
+    "categoria": "Gastos de oficina",
+    "created_at": "2024-03-15T10:30:00Z",
+    "updated_at": "2024-03-20T14:25:00Z"
+  }
+}
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request" type="error">
+  Invalid request body or attempting to update an XML expense
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Cannot update XML-imported expenses"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="403 Forbidden" type="error">
+  User does not have permission to update this expense
+  ```json
+  {
+    "error": "Forbidden",
+    "message": "You do not have permission to update this expense"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="404 Not Found" type="error">
+  Expense not found
+  ```json
+  {
+    "error": "Not Found",
+    "message": "Expense not found"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>

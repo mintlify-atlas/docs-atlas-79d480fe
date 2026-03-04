@@ -1,0 +1,418 @@
+---
+title: Project structure
+description: Detailed explanation of the Contafy codebase organization and directory structure
+---
+
+Contafy follows Next.js App Router conventions with a clear separation of concerns and modular organization.
+
+## Root directory
+
+```
+contafy/
+├── app/                    # Next.js App Router (routes and pages)
+├── components/            # Global reusable components
+├── lib/                   # Business logic, utilities, and types
+├── public/                # Static assets
+├── docs/                  # Documentation (this site)
+├── scripts/               # Build and utility scripts
+├── next.config.ts         # Next.js configuration
+├── tsconfig.json          # TypeScript configuration
+├── tailwind.config.ts     # Tailwind CSS configuration
+├── postcss.config.mjs     # PostCSS configuration
+├── package.json           # Dependencies and scripts
+├── pnpm-lock.yaml         # Dependency lock file
+└── .env.local             # Environment variables (not in git)
+```
+
+## app/ directory
+
+The `app/` directory contains all routes and pages using Next.js App Router conventions.
+
+### Route structure
+
+```
+app/
+├── auth/                  # Authentication routes
+│   ├── login/
+│   │   └── page.tsx       # /auth/login
+│   ├── register/
+│   │   └── page.tsx       # /auth/register
+│   ├── forgot-password/
+│   │   └── page.tsx       # /auth/forgot-password
+│   ├── reset-password/
+│   │   └── page.tsx       # /auth/reset-password
+│   └── verify-email/
+│       └── page.tsx       # /auth/verify-email
+├── dashboard/             # Main application routes (protected)
+│   ├── components/        # Dashboard-specific components
+│   ├── certification/     # Certification management
+│   ├── expenses/          # Expense management
+│   │   ├── components/
+│   │   └── page.tsx
+│   ├── invoices/          # Invoice management
+│   │   ├── components/
+│   │   └── page.tsx
+│   ├── reporte/           # Financial reports
+│   │   ├── components/
+│   │   └── page.tsx
+│   ├── sat-search/        # SAT invoice search
+│   │   └── page.tsx
+│   ├── setup/             # Initial setup flow
+│   │   └── page.tsx
+│   └── page.tsx           # /dashboard (main dashboard)
+├── subscription/          # Subscription management
+│   ├── success/page.tsx
+│   └── cancel/page.tsx
+├── internal/              # Internal admin routes
+│   └── discount-management/
+├── api/                   # API routes
+│   └── auth/              # Auth API endpoints
+├── components/            # Route-specific shared components
+├── layout.tsx             # Root layout
+├── page.tsx               # Landing page (/)
+├── error.tsx              # Route error handler
+├── not-found.tsx          # 404 page
+└── globals.css            # Global styles
+```
+
+### File naming conventions
+
+- `page.tsx`: Route page component (required for route)
+- `layout.tsx`: Shared layout for route segment
+- `loading.tsx`: Loading UI for route segment
+- `error.tsx`: Error UI for route segment
+- `not-found.tsx`: 404 UI for route segment
+- `route.ts`: API route handler
+
+### Layout hierarchy
+
+**Root layout** (`app/layout.tsx`):
+
+- Sets up global providers (ReactQueryProvider, TokenRefresher)
+- Loads fonts (Geist Sans, Geist Mono)
+- Applies dark theme
+- Wraps all pages
+
+**Route-specific layouts**: Can be added in any route folder to wrap child routes
+
+## components/ directory
+
+Global reusable components shared across multiple routes.
+
+```
+components/
+├── auth/                  # Authentication components
+│   └── TokenRefresher.tsx # Automatic token refresh
+├── common/                # Common UI components
+│   ├── EmptyState.tsx
+│   ├── LoadingSpinner.tsx
+│   └── skeletons/         # Loading skeleton components
+│       └── TableRowsSkeleton.tsx
+├── layout/                # Layout components
+│   ├── Header.tsx
+│   ├── Sidebar.tsx
+│   └── Footer.tsx
+├── providers/             # React context providers
+│   └── ReactQueryProvider.tsx
+├── subscription/          # Subscription-related components
+│   └── SubscriptionGuard.tsx
+├── tour/                  # Product tour components
+│   └── TourProvider.tsx
+└── ui/                    # Shadcn/ui components
+    ├── button.tsx
+    ├── card.tsx
+    ├── dialog.tsx
+    ├── input.tsx
+    ├── select.tsx
+    ├── table.tsx
+    └── ... (30+ components)
+```
+
+### Component organization principles
+
+1. **Global components**: Place in `components/`
+2. **Route-specific components**: Place in `app/[route]/components/`
+3. **UI primitives**: Place in `components/ui/`
+4. **Feature components**: Group by feature in subdirectories
+
+### Example: Dashboard components
+
+```
+app/dashboard/components/
+├── DashboardContent.tsx      # Main content (Server Component)
+├── DashboardHeader.tsx       # Header with filters
+├── DashboardGreeting.tsx     # User greeting
+├── MetricsCards.tsx          # Financial metrics display
+├── FlowTrendChart.tsx        # Chart component (Client Component)
+├── RecentInvoicesTable.tsx   # Recent invoices table
+├── RecentExpensesTable.tsx   # Recent expenses table
+├── ExportPDFButton.tsx       # PDF export button
+└── TrialBannerWrapper.tsx    # Trial subscription banner
+```
+
+## lib/ directory
+
+Business logic, utilities, type definitions, and helper functions.
+
+```
+lib/
+├── api/                   # API client functions
+│   ├── client.ts          # Client-side API client
+│   ├── server-client.ts   # Server-side API client
+│   ├── auth.ts            # Auth API functions
+│   ├── auth.server.ts     # Server-only auth functions
+│   ├── invoices.ts        # Invoice API functions
+│   ├── invoices.client.ts
+│   ├── expenses.ts        # Expense API functions
+│   ├── expenses.client.ts
+│   ├── profiles.ts        # Profile API functions
+│   ├── profiles.client.ts
+│   ├── subscription.ts    # Subscription API functions
+│   ├── subscription.client.ts
+│   ├── sat.ts             # SAT integration
+│   ├── sat.client.ts
+│   ├── discounts.ts       # Discount management
+│   ├── discounts.client.ts
+│   ├── manual-incomes.client.ts
+│   └── accrued-expenses.client.ts
+├── types/                 # TypeScript type definitions
+│   ├── auth.ts            # Auth-related types
+│   ├── invoices.ts        # Invoice types
+│   ├── expenses.ts        # Expense types
+│   ├── profiles.ts        # Profile/RFC types
+│   ├── metrics.ts         # Metrics and analytics types
+│   ├── subscription.ts    # Subscription types
+│   ├── manual-incomes.ts  # Manual income types
+│   ├── sat.ts             # SAT data types
+│   ├── discounts.ts       # Discount types
+│   └── jspdf-autotable.d.ts # jsPDF type definitions
+├── utils/                 # Utility functions
+│   ├── logger.ts          # Pino logger setup
+│   ├── pdf-export.ts      # PDF export utilities
+│   ├── plans.ts           # Subscription plan utilities
+│   ├── subscription.ts    # Subscription helpers
+│   └── admin-route.ts     # Admin route config
+├── hooks/                 # Custom React hooks
+│   ├── useSubscription.ts # Subscription state hook
+│   ├── useTour.ts         # Product tour hook
+│   └── useProfileFreezeDetector.ts
+├── storage/               # Browser storage utilities
+│   └── profile-selection.ts # localStorage for profile
+├── constants/             # Application constants
+│   └── tour.ts            # Tour step definitions
+├── excel/                 # Excel export functionality
+│   ├── index.ts           # Main export function
+│   ├── core/              # Core Excel utilities
+│   │   ├── workbook.ts
+│   │   ├── styles.ts
+│   │   └── types.ts
+│   ├── sections/          # Report sections
+│   │   ├── header.ts
+│   │   ├── summary.ts
+│   │   ├── invoices.ts
+│   │   ├── expenses.ts
+│   │   ├── profiles.ts
+│   │   ├── invoices-report/
+│   │   └── expenses-report/
+│   ├── utils/             # Excel utilities
+│   │   ├── formatters.ts
+│   │   └── validators.ts
+│   └── constants.ts
+├── pdf/                   # PDF export functionality
+│   ├── index.ts           # Main export function
+│   ├── native/            # Native jsPDF reports
+│   │   ├── exportFinancialReport.ts
+│   │   └── exportProfiles.ts
+│   ├── html/              # HTML-to-PDF reports
+│   │   └── exportHtmlReport.ts
+│   └── layout/            # PDF layout components
+│       ├── header.ts
+│       ├── footer.ts
+│       ├── constants.ts
+│       └── reportHeaderFooter.ts
+├── firebase/              # Firebase configuration
+│   └── config.ts          # Firebase initialization
+├── navigation.ts          # Navigation utilities
+└── utils.ts               # General utility functions (cn)
+```
+
+### API client organization
+
+Each API module has two versions:
+
+1. **Server version** (`*.ts`): For Server Components
+2. **Client version** (`*.client.ts`): For Client Components
+
+**Example**:
+
+- `lib/api/invoices.ts` - Server-side API calls
+- `lib/api/invoices.client.ts` - Client-side API calls
+
+### Type definitions
+
+All API responses and data structures have TypeScript interfaces in `lib/types/`:
+
+```tsx
+// lib/types/invoices.ts
+export interface Invoice {
+  id: string;
+  folio: string;
+  serie: string;
+  fecha_emision: string;
+  total: number;
+  emisor_rfc: string;
+  receptor_rfc: string;
+  // ... more fields
+}
+
+export interface GetInvoicesResponse {
+  data: Invoice[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+```
+
+### Utilities organization
+
+- **General utilities**: `lib/utils.ts` (cn function)
+- **Feature-specific utilities**: `lib/utils/[feature].ts`
+- **Constants**: `lib/constants/`
+- **Custom hooks**: `lib/hooks/`
+
+## public/ directory
+
+Static assets served directly by Next.js.
+
+```
+public/
+├── favicon.ico           # Browser favicon
+├── favicon-16x16.png     # 16x16 favicon
+├── favicon-32x32.png     # 32x32 favicon
+├── favicon-48x48.png     # 48x48 favicon
+├── apple-touch-icon.png  # iOS home screen icon
+├── icon-192x192.png      # Android icon
+├── icon-512x512.png      # Android icon
+├── logotipo-contafy.svg  # Contafy logo
+└── logotipo-tresa-design.svg # Design credit
+```
+
+All files in `public/` are accessible at the root URL:
+
+```tsx
+<img src="/logotipo-contafy.svg" alt="Contafy" />
+```
+
+## Configuration files
+
+### next.config.ts
+
+Next.js configuration:
+
+- API proxy setup (`/backend` → `NEXT_PUBLIC_API_URL`)
+- Build optimization settings
+
+### tsconfig.json
+
+TypeScript configuration:
+
+- Strict mode enabled
+- Path aliases: `@/*` → project root
+- Target: ES2017
+
+### tailwind.config.ts
+
+Tailwind CSS configuration:
+
+- Custom theme colors
+- Dark mode setup
+- Custom plugins
+
+### postcss.config.mjs
+
+PostCSS configuration:
+
+- Tailwind CSS plugin
+- Autoprefixer
+
+### eslint.config.mjs
+
+ESLint configuration:
+
+- Next.js recommended rules
+- Prettier integration
+
+### components.json
+
+Shadcn/ui configuration:
+
+- Component installation settings
+- Path aliases
+- Style preferences
+
+## Module resolution
+
+Path aliases configured in `tsconfig.json:21-23`:
+
+```json
+{
+  "paths": {
+    "@/*": ["./*"]
+  }
+}
+```
+
+**Usage**:
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { apiClient } from '@/lib/api/client';
+import type { Invoice } from '@/lib/types/invoices';
+```
+
+## Import conventions
+
+1. **External packages** first
+2. **Internal components** second
+3. **Types** last
+
+**Example**:
+
+```tsx
+// External
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+
+// Internal
+import { Button } from '@/components/ui/button';
+import { getInvoices } from '@/lib/api/invoices.client';
+
+// Types
+import type { Invoice } from '@/lib/types/invoices';
+```
+
+## Code splitting
+
+Next.js automatically code-splits:
+
+- **Each route**: Separate bundle per route
+- **Client Components**: Only sent when needed
+- **Server Components**: Zero client JavaScript
+- **Dynamic imports**: Manual code splitting with `next/dynamic`
+
+## Build artifacts
+
+```
+.next/                    # Build output (gitignored)
+├── cache/                # Build cache
+├── server/               # Server-side bundles
+├── static/               # Static assets
+└── types/                # Generated TypeScript types
+
+node_modules/             # Dependencies (gitignored)
+```
+
+See [Data Fetching](/development/data-fetching) for how data flows through this structure.

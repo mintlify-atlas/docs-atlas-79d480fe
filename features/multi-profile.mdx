@@ -1,0 +1,271 @@
+---
+title: Multi-profile management
+description: Manage multiple business entities within a single Contafy account with separate financial tracking
+---
+
+Contafy's multi-profile system allows you to manage multiple business entities (companies, subsidiaries, or separate activities) from a single user account, with complete financial separation between profiles.
+
+## Profile structure
+
+Each profile represents a distinct business entity:
+
+```typescript
+export interface Profile {
+  id: string;
+  user_id: string;
+  nombre: string;
+  rfc: string;
+  tipo_persona: 'FISICA' | 'MORAL';
+  regimenes_fiscales: string[];
+  validaciones_habilitadas: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  frozen?: boolean;
+  frozen_reason?: 'plan_limit' | 'user_suspension' | 'payment_issue' | null;
+  frozen_at?: string | null;
+}
+```
+
+### Key profile attributes
+
+- **nombre** - Business or entity name
+- **rfc** - Mexican tax identification number (RFC)
+- **tipo_persona** - Legal entity type (FISICA for individuals, MORAL for corporations)
+- **regimenes_fiscales** - Array of applicable tax regimes (catálogo SAT c_RegimenFiscal)
+
+<Info>
+  A single profile can have multiple tax regimes. For example, a person might have both "Régimen de Actividades Profesionales" and "Arrendamiento" in their regimenes_fiscales array.
+</Info>
+
+## Creating profiles
+
+### Profile creation form
+
+When creating a new profile (`/dashboard/setup/profiles/new`), you configure:
+
+```typescript
+interface CreateProfileRequest {
+  nombre: string;
+  rfc: string;
+  tipo_persona: 'FISICA' | 'MORAL';
+  regimenes_fiscales?: string[];
+  validaciones_habilitadas?: {
+    validarRFCIngresos?: boolean;
+    validarRFCGastos?: boolean;
+    validarRegimenFiscal?: boolean;
+    validarUUIDDuplicado?: boolean;
+    bloquearSiRFCNoCoincide?: boolean;
+    bloquearSiRegimenNoCoincide?: boolean;
+  };
+}
+```
+
+### Validation rules
+
+Each profile can have custom validation rules:
+
+- **validarRFCIngresos** - Verify RFC in incoming invoices
+- **validarRFCGastos** - Verify RFC in expense receipts
+- **validarRegimenFiscal** - Verify tax regime matches profile
+- **validarUUIDDuplicado** - Check for duplicate UUIDs
+- **bloquearSiRFCNoCoincide** - Reject uploads if RFC doesn't match
+- **bloquearSiRegimenNoCoincide** - Reject uploads if regime doesn't match
+
+<Warning>
+  When `bloquearSiRFCNoCoincide` or `bloquearSiRegimenNoCoincide` are enabled, uploads that fail validation will be completely rejected. Use these settings carefully.
+</Warning>
+
+## Profile limits by plan
+
+Contafy enforces profile limits based on subscription plan:
+
+- **FREE** - Limited number of profiles
+- **BASIC** - More profiles available
+- **PREMIUM/ENTERPRISE** - Higher or unlimited profiles
+
+The system tracks:
+
+```typescript
+const { canCreate, remaining, currentCount } = useProfileLimits(subscription);
+```
+
+When you reach your plan limit, the "Create Profile" button is disabled with an upgrade prompt.
+
+## Profile freezing
+
+Profiles can be frozen for various reasons:
+
+```typescript
+type FrozenReason = 'plan_limit' | 'user_suspension' | 'payment_issue' | null;
+```
+
+### Frozen profile behavior
+
+- Frozen profiles cannot upload new invoices or expenses
+- Existing data remains viewable
+- Dashboard metrics still include frozen profile data
+- Profile appears with a "frozen" badge in the UI
+
+<Note>
+  Profiles are typically frozen when you exceed your subscription's profile limit. Upgrading your plan will automatically unfreeze the profiles.
+</Note>
+
+## Using profiles throughout Contafy
+
+### Global profile selector
+
+Most pages include a profile selector dropdown that allows you to:
+
+- View data for a specific profile
+- View aggregated data across all profiles ("Todas las empresas")
+- Switch profiles without leaving the current page
+
+### Profile-filtered views
+
+When a profile is selected:
+
+- Dashboard shows metrics for that specific profile
+- Invoice and expense lists filter to that profile's data
+- Reports generate for that profile only
+- Upload forms pre-select the active profile
+
+### Aggregated view
+
+When "Todas las empresas" is selected:
+
+- Dashboard aggregates metrics across all profiles
+- Lists show invoices/expenses from all profiles with profile badges
+- Charts combine data from all profiles
+- Some features (like manual entry) are disabled in aggregate view
+
+<Tip>
+  The dashboard greeting changes when viewing all profiles: "Buenos días, [nombre] - Todas las empresas" to make it clear you're in aggregate view.
+</Tip>
+
+## Profile management interface
+
+The profiles table (`/dashboard/setup/profiles`) displays:
+
+### Table columns
+
+- **Nombre** - Profile name with persona type badge (Física/Moral)
+- **RFC** - Tax identification number
+- **Regímenes fiscales** - Badge list of tax regimes (up to 3 visible)
+- **Estado** - Status (Active/Frozen)
+- **Facturas/Gastos** - Usage statistics
+- **Acciones** - Edit and delete actions
+
+### Profile actions
+
+- **Edit** - Modify profile details and validation settings (`/dashboard/setup/profiles/[id]`)
+- **Delete** - Remove profile and all associated data (requires confirmation)
+- **Export** - Export profile list to PDF or Excel
+
+### Tax regime display
+
+The table uses the SAT régimen fiscal catalog to display human-readable regime descriptions:
+
+```typescript
+interface RegimenFiscalItem {
+  clave: string;
+  descripcion: string;
+  aplica_persona_fisica: boolean;
+  aplica_persona_moral: boolean;
+}
+```
+
+Regimes are fetched from `/api/sat/regimenes-fiscales` and displayed with proper descriptions.
+
+## Profile-specific periods
+
+Financial periods are created per profile:
+
+- Each profile has its own monthly periods
+- Period IDs are UUIDs
+- Manual entries require a valid period_id for the profile
+- Aggregate view uses period_id "aggregated" (special case)
+
+<Info>
+  When viewing "Todas las empresas", the period_id is "aggregated", which disables manual income/expense entry since these features require a specific profile's period.
+</Info>
+
+## Data isolation
+
+### Complete separation
+
+Each profile's data is fully isolated:
+
+- Invoices link to profile via `profile_id`
+- Expenses link to profile via `profile_id`
+- Metrics calculated separately per profile
+- Reports generated independently
+
+### Cross-profile features
+
+Some features work across profiles:
+
+- Dashboard aggregate view sums all metrics
+- Trend charts can combine data from multiple profiles
+- Global search can find transactions across profiles
+
+## Editing profiles
+
+The edit form (`/dashboard/setup/profiles/[id]`) allows updating:
+
+```typescript
+interface UpdateProfileRequest {
+  nombre?: string;
+  rfc?: string;
+  tipo_persona?: 'FISICA' | 'MORAL';
+  regimenes_fiscales?: string[];
+  validaciones_habilitadas?: {...};
+}
+```
+
+<Warning>
+  Changing a profile's RFC or tax regimes may affect existing invoice and expense validations. Existing data is not revalidated after profile changes.
+</Warning>
+
+## Export capabilities
+
+The profiles table supports data export:
+
+### PDF export
+
+```typescript
+exportProfilesToPDF(profiles: Profile[], stats: ProfileStats[]): Promise<void>
+```
+
+Generates a formatted PDF with:
+- Profile details
+- Tax regimes
+- Usage statistics
+- Validation settings
+
+### Excel export
+
+```typescript
+exportProfilesToExcel(profiles: Profile[], stats: ProfileStats[]): Promise<void>
+```
+
+Creates a spreadsheet with:
+- All profile fields
+- Statistics columns
+- Filterable and sortable data
+
+## Related features
+
+<CardGroup cols={2}>
+  <Card title="Invoice Management" icon="file-text" href="/features/invoice-management">
+    Upload invoices for specific profiles
+  </Card>
+  <Card title="Expense Tracking" icon="receipt" href="/features/expense-tracking">
+    Track expenses per business entity
+  </Card>
+  <Card title="Dashboard" icon="gauge" href="/features/dashboard">
+    View metrics aggregated or per profile
+  </Card>
+  <Card title="Reports & Analytics" icon="chart-bar" href="/features/reports-analytics">
+    Generate reports for specific profiles
+  </Card>
+</CardGroup>

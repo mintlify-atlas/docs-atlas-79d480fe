@@ -1,0 +1,124 @@
+---
+title: Dashboard
+description: Centralized view of your financial metrics, cash flow, and business performance
+---
+
+The Contafy dashboard provides a comprehensive overview of your business's financial health, combining real-time metrics, trend analysis, and quick access to recent transactions.
+
+## Key capabilities
+
+The dashboard presents three main areas of financial information:
+
+### Cash flow metrics
+
+Real-time visibility into your actual cash movements:
+
+- **Ingresos cobrados** - Actual cash received from invoices and payment complements
+- **Egresos pagados** - Cash paid out for expenses
+- **Flujo neto** - Net cash flow with operating margin percentage
+
+<Note>
+  The dashboard automatically detects unreconciled payment complements (complementos sin conciliar) and displays them separately in the metrics cards.
+</Note>
+
+### Accrual-based accounting
+
+Accounting metrics based on CFDI issue dates:
+
+- **Ingresos devengados** - Total invoices issued (accrued revenue)
+- **Egresos devengados** - Total expenses received (accrued expenses)
+- **Resultado devengado** - Estimated profit before taxes
+
+These metrics follow Mexican accounting standards and are based on when invoices were issued, not when they were paid.
+
+### Pending transactions
+
+Track outstanding receivables and payables:
+
+- **Por cobrar** - Invoices pending payment (accounts receivable)
+- **Por pagar** - Authorized expenses pending payment (accounts payable)
+
+## Trend visualization
+
+The **Tendencia de Flujo** chart displays cash flow and accrued metrics over time using Recharts area and line charts. The chart is interactive and loaded lazily to optimize performance.
+
+### Chart features
+
+- **Multiple period views**: Choose from año actual, últimos 12 meses, año completo, or comparar anterior
+- **Series toggle**: Show/hide individual data series (ingresos cobrados, egresos pagados, ingresos devengados, egresos devengados)
+- **Visual differentiation**: Area charts for collected income, dashed lines for expenses
+
+```typescript
+interface TrendDataPoint {
+  mes: number;
+  año: number;
+  ingresos_cobrados: number;
+  egresos_pagados: number;
+  ingresos_devengados: number;
+  egresos_devengados: number;
+}
+```
+
+## Filtering and context
+
+The dashboard supports comprehensive filtering:
+
+- **Profile selection** - View data for a specific business profile or all profiles combined
+- **Month/year selection** - Focus on specific time periods
+- **Régimen fiscal** - Filter by specific tax regime when a profile has multiple regimes
+
+<Info>
+  When viewing "Todas las empresas", metrics are aggregated across all your business profiles. The dashboard will display "Todas las empresas" in the greeting when no specific profile is selected.
+</Info>
+
+## Recent transactions
+
+Two side-by-side tables show:
+
+- **Recent invoices** - Last 3 invoices with payment status indicators
+- **Recent expenses** - Last 3 expenses with payment status
+
+Each table links to the full invoice or expense management view for detailed exploration.
+
+## Export functionality
+
+The **ExportPDFButton** component (lazy-loaded) generates comprehensive PDF reports using jsPDF:
+
+- Includes all dashboard metrics for the selected period
+- Uses the ReporteMensualTemplate for consistent formatting
+- Respects profile and time period filters
+
+<Tip>
+  The PDF export button appears in the top-right corner next to the dashboard greeting. PDF generation happens client-side for security and performance.
+</Tip>
+
+## Related features
+
+<CardGroup cols={2}>
+  <Card title="Invoice Management" icon="file-text" href="/features/invoice-management">
+    Manage and track all your issued invoices
+  </Card>
+  <Card title="Expense Tracking" icon="receipt" href="/features/expense-tracking">
+    Track business expenses and payment status
+  </Card>
+  <Card title="Reports & Analytics" icon="chart-bar" href="/features/reports-analytics">
+    Generate detailed financial reports
+  </Card>
+</CardGroup>
+
+## Technical details
+
+The dashboard is implemented as a server component that fetches data in parallel:
+
+```typescript
+const [metrics, invoices, expenses, profiles, trendData, currentUser] = await Promise.all([
+  getMetrics(profileId, mes, año, regimenFiscal),
+  getInvoices({ profileId, mes, año, regimen_fiscal: regimenFiscal, limit: 3 }),
+  getExpenses({ profileId, mes, año, regimen_fiscal: regimenFiscal, limit: 3 }),
+  getProfiles(),
+  getTrendData(profileId, año, 'año-actual', mes, regimenFiscal),
+  getCurrentUser(),
+]);
+```
+
+The dashboard uses dynamic rendering (`export const dynamic = 'force-dynamic'`) to ensure users always see fresh data without cache issues.

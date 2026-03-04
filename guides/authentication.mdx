@@ -1,0 +1,194 @@
+---
+title: Authentication
+description: Learn how to register, log in, and verify your email in Contafy
+---
+
+Contafy provides secure authentication for managing your Mexican CFDI invoices. This guide walks you through creating an account, logging in, and verifying your email.
+
+## Creating an account
+
+To start using Contafy, you'll need to create a free account.
+
+<Steps>
+  <Step title="Navigate to the registration page">
+    Visit the [registration page](/auth/register) or click "Crea una cuenta gratis" from the login page.
+  </Step>
+
+  <Step title="Choose your registration method">
+    You can register using:
+    - **Email and password** - Complete the registration form
+    - **Google Sign-In** - Use your Google account for quick access
+  </Step>
+
+  <Step title="Fill out the registration form">
+    If registering with email, provide the following information:
+    
+    - **Nombre** (First name): e.g., "Juan"
+    - **Apellido** (Last name): e.g., "Pérez"
+    - **Correo electrónico** (Email): Your business email address
+    - **Teléfono** (Phone): Mexican phone number (optional)
+    - **Contraseña** (Password): Minimum 8 characters
+    - **Confirmar contraseña**: Re-enter your password
+    
+    All fields marked as required must be completed.
+  </Step>
+
+  <Step title="Submit your registration">
+    Click the "Crear cuenta" button to submit your registration. The system will create your account and send a verification email.
+  </Step>
+</Steps>
+
+<Note>
+  After registration, you'll be redirected to the email verification page. Check your inbox for the verification email.
+</Note>
+
+## Logging in
+
+Once you have an account, you can log in to access your dashboard.
+
+<Steps>
+  <Step title="Go to the login page">
+    Navigate to [/auth/login](/auth/login) or click "Inicia sesión" from the homepage.
+  </Step>
+
+  <Step title="Enter your credentials">
+    Provide your login information:
+    
+    - **Correo electrónico**: The email you registered with
+    - **Contraseña**: Your account password
+    
+    Alternatively, click "Continuar con Google" to sign in with your Google account.
+  </Step>
+
+  <Step title="Click Ingresar">
+    Submit the form to log in. If your credentials are correct and your email is verified, you'll be redirected to your dashboard.
+  </Step>
+</Steps>
+
+<Warning>
+  If your email is not verified, you'll be redirected to the email verification page instead of the dashboard.
+</Warning>
+
+### Forgot your password?
+
+If you can't remember your password:
+
+<Steps>
+  <Step title="Click '¿Olvidaste tu contraseña?'">
+    On the login page, click the "¿Olvidaste tu contraseña?" link below the password field.
+  </Step>
+
+  <Step title="Enter your email address">
+    Provide the email address associated with your account.
+  </Step>
+
+  <Step title="Check your email">
+    You'll receive a password reset link. Click the link and follow the instructions to create a new password.
+  </Step>
+
+  <Step title="Log in with your new password">
+    After resetting your password, return to the login page and sign in with your new credentials.
+  </Step>
+</Steps>
+
+## Email verification
+
+Email verification is required to access your Contafy dashboard and ensure account security.
+
+### Verifying your email
+
+<Steps>
+  <Step title="Check your inbox">
+    After registration, check the email address you provided for a verification message from Contafy.
+  </Step>
+
+  <Step title="Click the verification link">
+    Open the email and click the verification link. This will automatically verify your email address.
+  </Step>
+
+  <Step title="Access your dashboard">
+    Once verified, you'll be redirected to your dashboard or the login page. Log in to start using Contafy.
+  </Step>
+</Steps>
+
+### Resending the verification email
+
+If you didn't receive the verification email or the link expired:
+
+<Steps>
+  <Step title="Go to the verification page">
+    Navigate to `/auth/verify-email` or click the prompt when trying to log in.
+  </Step>
+
+  <Step title="Enter your email address">
+    Provide the email address you registered with.
+  </Step>
+
+  <Step title="Click 'Reenviar código'">
+    Request a new verification email. Check your inbox and spam folder.
+  </Step>
+</Steps>
+
+<Tip>
+  If you don't see the verification email, check your spam or junk folder. Add noreply@contafy.com to your contacts to ensure future emails are delivered.
+</Tip>
+
+## Google Sign-In
+
+Contafy supports Google Sign-In for faster authentication without managing passwords.
+
+### First-time Google Sign-In
+
+When you sign in with Google for the first time:
+
+1. Click "Continuar con Google" on the login or registration page
+2. Select your Google account
+3. Grant Contafy permission to access your basic profile information
+4. Your account is automatically created and verified
+5. You're redirected to your dashboard
+
+<Note>
+  Google accounts are automatically verified and don't require email verification.
+</Note>
+
+## Security best practices
+
+To keep your account secure:
+
+- **Use a strong password**: Combine uppercase, lowercase, numbers, and special characters
+- **Enable two-factor authentication**: Coming soon in future updates
+- **Don't share credentials**: Keep your login information private
+- **Log out on shared devices**: Always log out when using public or shared computers
+- **Monitor account activity**: Review your recent activity regularly
+
+## Troubleshooting
+
+### "Email y contraseña son requeridos"
+
+Both email and password fields must be filled. Check that you've entered information in both fields.
+
+### "Error al iniciar sesión"
+
+This generic error can occur due to:
+- Incorrect email or password
+- Network connectivity issues
+- Server maintenance
+
+Double-check your credentials and try again. If the problem persists, use the password reset feature.
+
+### "Email no verificado"
+
+Your email address hasn't been verified yet. Check your inbox for the verification email or request a new one from the verification page.
+
+## Next steps
+
+After successfully logging in:
+
+<CardGroup cols={2}>
+  <Card title="Set up your profile" icon="user" href="/guides/profile-setup">
+    Create your first RFC profile to start managing invoices
+  </Card>
+  <Card title="Upload invoices" icon="upload" href="/guides/uploading-invoices">
+    Learn how to upload and validate CFDI XML files
+  </Card>
+</CardGroup>

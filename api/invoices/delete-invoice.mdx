@@ -1,0 +1,104 @@
+---
+title: "Delete Invoice"
+api: "DELETE /api/invoices/{id}"
+description: "Delete an invoice by its ID"
+---
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the Authorization header.
+
+```
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the invoice to delete
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string">
+  Success message confirming the deletion
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X DELETE "https://api.contafy.com/api/invoices/inv_abc123" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript
+const response = await fetch('https://api.contafy.com/api/invoices/inv_abc123', {
+  method: 'DELETE',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const data = await response.json();
+```
+
+## Example Response
+
+```json
+{
+  "message": "Invoice deleted successfully"
+}
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized">
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Invalid or missing access token"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="404 Not Found">
+  ```json
+  {
+    "error": "Not Found",
+    "message": "Invoice not found"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="403 Forbidden">
+  ```json
+  {
+    "error": "Forbidden",
+    "message": "You do not have permission to delete this invoice"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="409 Conflict">
+  ```json
+  {
+    "error": "Conflict",
+    "message": "Cannot delete invoice with associated payment complements"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error">
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>
+
+## Notes
+
+- Deleting an invoice is permanent and cannot be undone
+- If the invoice has associated payment complements (complementos de pago), you may need to delete those first
+- All related payment status calculations will be recalculated for affected invoices

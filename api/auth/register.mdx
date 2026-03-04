@@ -1,0 +1,135 @@
+---
+title: 'Register'
+api: 'POST /api/auth/register'
+description: 'Create a new user account'
+---
+
+Registers a new user in the Contafy platform. After successful registration, a verification email is sent to the provided email address.
+
+## Authentication
+
+No authentication required.
+
+## Request Body
+
+<ParamField body="email" type="string" required>
+  User's email address. Must be a valid email format and unique in the system.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password. Should meet security requirements (minimum 8 characters recommended).
+</ParamField>
+
+<ParamField body="nombre" type="string">
+  User's first name (optional).
+</ParamField>
+
+<ParamField body="apellido" type="string">
+  User's last name (optional).
+</ParamField>
+
+<ParamField body="telefono" type="string">
+  User's phone number (optional).
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string">
+  Success message confirming registration.
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  The newly created user object.
+  
+  <ResponseField name="id" type="string">
+    Unique user identifier.
+  </ResponseField>
+  
+  <ResponseField name="email" type="string">
+    User's email address.
+  </ResponseField>
+  
+  <ResponseField name="nombre" type="string | null">
+    User's first name.
+  </ResponseField>
+  
+  <ResponseField name="apellido" type="string | null">
+    User's last name.
+  </ResponseField>
+  
+  <ResponseField name="telefono" type="string | null">
+    User's phone number.
+  </ResponseField>
+  
+  <ResponseField name="email_verified" type="boolean">
+    Email verification status. Will be `false` for newly registered users.
+  </ResponseField>
+  
+  <ResponseField name="tour_version" type="string | null">
+    Version of the product tour completed by the user.
+  </ResponseField>
+  
+  <ResponseField name="tour_completed_at" type="string | null">
+    Timestamp when the tour was completed.
+  </ResponseField>
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X POST https://api.contafy.com/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "usuario@ejemplo.com",
+    "password": "SecurePass123!",
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "telefono": "+52 55 1234 5678"
+  }'
+```
+
+## Example Response
+
+```json
+{
+  "message": "Usuario registrado exitosamente. Por favor verifica tu correo electrónico.",
+  "user": {
+    "id": "usr_1a2b3c4d5e6f7g8h",
+    "email": "usuario@ejemplo.com",
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "telefono": "+52 55 1234 5678",
+    "email_verified": false,
+    "tour_version": null,
+    "tour_completed_at": null
+  }
+}
+```
+
+## Error Responses
+
+<ResponseField name="error" type="string">
+  Error type identifier.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable error message.
+</ResponseField>
+
+### Common Errors
+
+**400 Bad Request**
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "El email ya está registrado"
+}
+```
+
+**400 Bad Request**
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "El formato del email es inválido"
+}
+```

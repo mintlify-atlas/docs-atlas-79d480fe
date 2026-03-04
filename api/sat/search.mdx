@@ -1,0 +1,189 @@
+---
+title: 'Search SAT Products'
+description: 'Search the SAT product and service catalog'
+---
+
+## GET /api/sat/search
+
+Searches the SAT (Servicio de Administración Tributaria) product and service catalog with filtering and pagination. Returns products/services matching the search criteria.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Query Parameters
+
+<ParamField query="query" type="string" optional>
+  Search term to find products/services by description or keywords
+</ParamField>
+
+<ParamField query="incluir_iva_trasladado" type="string" optional>
+  Filter by IVA requirement. Options: `Sí`, `No`, `Opcional`
+</ParamField>
+
+<ParamField query="incluir_ieps_trasladado" type="string" optional>
+  Filter by IEPS requirement. Options: `Sí`, `No`, `Opcional`
+</ParamField>
+
+<ParamField query="limit" type="number" optional default="20">
+  Number of results per page (1-100)
+</ParamField>
+
+<ParamField query="offset" type="number" optional default="0">
+  Number of results to skip for pagination
+</ParamField>
+
+## Response
+
+<ResponseField name="items" type="SATProductServiceAttributes[]" required>
+  Array of SAT product/service objects
+  
+  <Expandable title="Product/Service Object">
+    <ResponseField name="id" type="string" required>
+      SAT product/service code (e.g., "80141600")
+    </ResponseField>
+    
+    <ResponseField name="descripcion" type="string" required>
+      Description of the product or service
+    </ResponseField>
+    
+    <ResponseField name="incluir_iva_trasladado" type="string" required>
+      IVA requirement. Options: `Sí`, `No`, `Opcional`
+    </ResponseField>
+    
+    <ResponseField name="incluir_ieps_trasladado" type="string" required>
+      IEPS requirement. Options: `Sí`, `No`, `Opcional`
+    </ResponseField>
+    
+    <ResponseField name="complemento_que_debe_incluir" type="string" optional>
+      Required complement for invoicing. Null if none required
+    </ResponseField>
+    
+    <ResponseField name="fecha_inicio_vigencia" type="string" required>
+      Start date of validity (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="fecha_fin_vigencia" type="string" optional>
+      End date of validity (ISO 8601 format). Null if still valid
+    </ResponseField>
+    
+    <ResponseField name="estimulo_franja_fronteriza" type="string" required>
+      Border zone stimulus information
+    </ResponseField>
+    
+    <ResponseField name="palabras_similares" type="string" optional>
+      Similar keywords for search optimization. Null if none
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="string" required>
+      Record creation timestamp
+    </ResponseField>
+    
+    <ResponseField name="updated_at" type="string" required>
+      Record last update timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="total" type="number" required>
+  Total number of results matching the query
+</ResponseField>
+
+<ResponseField name="limit" type="number" required>
+  Number of items returned in this response
+</ResponseField>
+
+<ResponseField name="offset" type="number" required>
+  Offset used for this query
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X GET "https://api.contafy.com/api/sat/search?query=consultoría&limit=10&offset=0" \
+  -H "Cookie: access_token=your_access_token"
+```
+
+## Example Response
+
+```json
+{
+  "items": [
+    {
+      "id": "80141600",
+      "descripcion": "Servicios de consultoría de negocios y administración corporativa",
+      "incluir_iva_trasladado": "Sí",
+      "incluir_ieps_trasladado": "No",
+      "complemento_que_debe_incluir": null,
+      "fecha_inicio_vigencia": "2017-01-01T00:00:00Z",
+      "fecha_fin_vigencia": null,
+      "estimulo_franja_fronteriza": "No aplica",
+      "palabras_similares": "consultoría empresarial asesoría negocios",
+      "created_at": "2023-01-15T10:00:00Z",
+      "updated_at": "2023-01-15T10:00:00Z"
+    },
+    {
+      "id": "80141601",
+      "descripcion": "Servicios de consultoría en administración de recursos humanos",
+      "incluir_iva_trasladado": "Sí",
+      "incluir_ieps_trasladado": "No",
+      "complemento_que_debe_incluir": null,
+      "fecha_inicio_vigencia": "2017-01-01T00:00:00Z",
+      "fecha_fin_vigencia": null,
+      "estimulo_franja_fronteriza": "No aplica",
+      "palabras_similares": "recursos humanos rrhh personal",
+      "created_at": "2023-01-15T10:00:00Z",
+      "updated_at": "2023-01-15T10:00:00Z"
+    }
+  ],
+  "total": 45,
+  "limit": 10,
+  "offset": 0
+}
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="400 Bad Request" type="error">
+  Invalid query parameters
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "Invalid limit. Must be between 1 and 100"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="429 Too Many Requests" type="error">
+  Rate limit exceeded based on plan limits
+  ```json
+  {
+    "error": "Too Many Requests",
+    "message": "SAT search limit exceeded for your plan"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>
+
+<Note>
+  Search limits vary by subscription plan. Check your plan's `satBasicSearchesPerMonth` limit.
+</Note>

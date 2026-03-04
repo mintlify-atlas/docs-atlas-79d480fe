@@ -1,0 +1,349 @@
+---
+title: Development setup
+description: Set up your local development environment for Contafy
+---
+
+This guide will help you set up Contafy for local development.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+### Node.js 20+
+
+Contafy requires Node.js version 20 or higher.
+
+**Check your version**:
+
+```bash
+node --version
+```
+
+If you need to install or update Node.js:
+
+- **Download**: [nodejs.org](https://nodejs.org/)
+- **Version manager**: Use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm)
+
+**With nvm**:
+
+```bash
+nvm install 20
+nvm use 20
+```
+
+### pnpm 8+
+
+Contafy uses pnpm as its package manager.
+
+**Install pnpm**:
+
+```bash
+npm install -g pnpm
+```
+
+**Check your version**:
+
+```bash
+pnpm --version
+```
+
+## Clone the repository
+
+Clone the Contafy repository to your local machine:
+
+```bash
+git clone https://github.com/your-org/contafy.git
+cd contafy
+```
+
+## Install dependencies
+
+Install all project dependencies with pnpm:
+
+```bash
+pnpm install
+```
+
+This will:
+
+- Install all packages from `package.json`
+- Create a `node_modules/` directory
+- Generate a `pnpm-lock.yaml` lock file
+- Set up Git hooks (if configured)
+
+**Expected output**:
+
+```
+Progress: resolved 1234, reused 1200, downloaded 34, added 1234, done
+```
+
+## Environment variables
+
+Create a `.env.local` file in the project root:
+
+```bash
+cp .env.example .env.local
+```
+
+**Edit `.env.local`** with your configuration:
+
+```env
+# API Backend URL
+NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# Frontend URL (used for redirects)
+NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
+
+# Admin Discount Route (optional)
+# Customize the internal admin route
+ADMIN_DISCOUNT_ROUTE=internal/discount-management
+```
+
+### Environment variable reference
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|----------|
+| `NEXT_PUBLIC_API_URL` | Backend API base URL | Yes | `http://localhost:3001` |
+| `NEXT_PUBLIC_FRONTEND_URL` | Frontend base URL | Yes | `http://localhost:3000` |
+| `ADMIN_DISCOUNT_ROUTE` | Admin panel route path | No | `internal/discount-management` |
+
+**Important**: Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser.
+
+## Backend API setup
+
+Contafy requires a backend API to function. Ensure your backend is running:
+
+1. **Clone the backend repository** (separate repo)
+2. **Install backend dependencies**
+3. **Configure backend environment variables**
+4. **Start the backend server** on port 3001
+
+Refer to the backend repository's documentation for detailed setup instructions.
+
+**Verify backend is running**:
+
+```bash
+curl http://localhost:3001/health
+```
+
+You should receive a successful response.
+
+## Run the development server
+
+Start the Next.js development server:
+
+```bash
+pnpm dev
+```
+
+**Expected output**:
+
+```
+  ▲ Next.js 16.1.1
+  - Local:        http://localhost:3000
+  - Network:      http://192.168.1.100:3000
+
+ ✓ Ready in 2.5s
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Alternative: Webpack mode
+
+If you encounter issues with the default Turbopack bundler:
+
+```bash
+pnpm dev:webpack
+```
+
+This uses the traditional Webpack bundler instead.
+
+## Verify the setup
+
+### Check the landing page
+
+Navigate to [http://localhost:3000](http://localhost:3000)
+
+You should see the Contafy landing page.
+
+### Test authentication
+
+1. Navigate to [http://localhost:3000/auth/login](http://localhost:3000/auth/login)
+2. You should see the login form
+3. Try registering a new account at [http://localhost:3000/auth/register](http://localhost:3000/auth/register)
+
+### Check API connectivity
+
+Open the browser console (F12) and check for any API errors.
+
+If everything is working:
+
+- No CORS errors
+- API requests to `/backend/*` are successful
+- Authentication flow works
+
+## Available scripts
+
+Contafy includes several npm scripts for development:
+
+### Development
+
+```bash
+# Start development server with Turbopack (fast)
+pnpm dev
+
+# Start development server with Webpack (compatible)
+pnpm dev:webpack
+```
+
+### Production build
+
+```bash
+# Build for production
+pnpm build
+
+# Start production server (requires build first)
+pnpm start
+```
+
+### Code quality
+
+```bash
+# Run ESLint
+pnpm lint
+
+# Run TypeScript type checking
+pnpm typecheck
+
+# Run all checks (lint + typecheck + build)
+pnpm verify:all
+
+# Run CI checks (lint + typecheck only)
+pnpm verify:ci
+```
+
+## Development workflow
+
+Typical development workflow:
+
+1. **Start the backend API** (separate terminal)
+2. **Start the frontend dev server**: `pnpm dev`
+3. **Make your changes** to the code
+4. **Hot reload** automatically updates the browser
+5. **Check for errors** in terminal and browser console
+6. **Run type checking**: `pnpm typecheck`
+7. **Run linting**: `pnpm lint`
+8. **Commit your changes**
+
+## IDE setup
+
+### VS Code (recommended)
+
+Recommended extensions:
+
+- **ESLint**: `dbaeumer.vscode-eslint`
+- **Prettier**: `esbenp.prettier-vscode`
+- **Tailwind CSS IntelliSense**: `bradlc.vscode-tailwindcss`
+- **TypeScript Error Translator**: `mattpocock.ts-error-translator`
+
+**Workspace settings** (`.vscode/settings.json`):
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
+```
+
+### Other IDEs
+
+Contafy works with any IDE that supports TypeScript and ESLint:
+
+- **WebStorm**: Built-in TypeScript and ESLint support
+- **Sublime Text**: Install LSP-typescript and LSP-eslint
+- **Vim/Neovim**: Use coc.nvim or native LSP
+
+## Troubleshooting
+
+### Port already in use
+
+If port 3000 is already in use:
+
+```bash
+# Find the process using port 3000
+lsof -i :3000
+
+# Kill the process
+kill -9 <PID>
+
+# Or use a different port
+PORT=3001 pnpm dev
+```
+
+### Module not found errors
+
+If you see module not found errors:
+
+```bash
+# Clear node_modules and reinstall
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+```
+
+### TypeScript errors
+
+If TypeScript shows errors:
+
+```bash
+# Run type checking
+pnpm typecheck
+
+# Restart TypeScript server in VS Code
+# Cmd+Shift+P → "TypeScript: Restart TS Server"
+```
+
+### API connection issues
+
+If API requests fail:
+
+1. Verify backend is running: `curl http://localhost:3001/health`
+2. Check `NEXT_PUBLIC_API_URL` in `.env.local`
+3. Check browser console for CORS errors
+4. Verify Next.js proxy configuration in `next.config.ts`
+
+### Hot reload not working
+
+If changes don't reflect in the browser:
+
+1. Check terminal for compilation errors
+2. Refresh the browser manually
+3. Restart the dev server: `Ctrl+C` then `pnpm dev`
+4. Clear Next.js cache: `rm -rf .next`
+
+## Next steps
+
+Now that your environment is set up:
+
+- Read [Conventions](/development/conventions) to understand code standards
+- Explore [Project Structure](/development/project-structure) to navigate the codebase
+- Learn [Data Fetching](/development/data-fetching) patterns
+- Review [Architecture](/development/architecture) for system design
+
+## Getting help
+
+If you encounter issues:
+
+1. Check the [troubleshooting section](#troubleshooting) above
+2. Search existing GitHub issues
+3. Ask in the team Slack channel
+4. Create a new GitHub issue with:
+   - Error message
+   - Steps to reproduce
+   - Your environment (OS, Node version, pnpm version)
+
+See [Contributing](/development/conventions) for guidelines on submitting code.

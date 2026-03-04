@@ -1,80 +1,130 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get started with Contafy in minutes - from account creation to your first invoice
 ---
 
-## Get started in three steps
+## Get started with Contafy
 
-Get your documentation site running locally and make your first customization.
+This guide will walk you through setting up your Contafy account and uploading your first CFDI invoice.
 
-### Step 1: Set up your local environment
+<Steps>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+<Step title="Create your account">
 
-### Step 2: Deploy your changes
+Navigate to the registration page and create your account:
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+1. Visit `https://your-contafy-domain.com/auth/register`
+2. Fill in your details:
+   - **First name** (Nombre)
+   - **Last name** (Apellido)
+   - **Email**: Your email address for account access
+   - **Phone**: Optional contact number
+   - **Password**: Minimum 8 characters
+   - **Confirm password**: Re-enter your password
+3. Click **Crear cuenta** (Create account)
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+<Note>
+You'll receive a verification email to confirm your account. Check your inbox and click the verification link before proceeding.
+</Note>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+</Step>
 
-### Step 3: Go live
+<Step title="Verify your email">
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+After registration:
+
+1. Check your email inbox for a verification message from Contafy
+2. Click the verification link in the email
+3. You'll be redirected to the success page
+4. Click **Ir al Dashboard** to access your dashboard
+
+<Warning>
+Your account must be verified before you can create profiles or upload invoices. If you don't receive the email, check your spam folder.
+</Warning>
+
+</Step>
+
+<Step title="Create your first profile (RFC)">
+
+Profiles represent the different RFCs (tax IDs) you want to manage:
+
+1. Navigate to **Configuración** (Setup) from the dashboard sidebar
+2. Click on the **Perfiles** tab
+3. Click **Crear Nuevo Perfil** (Create New Profile)
+4. Fill in the profile information:
+   - **Nombre**: Business or individual name
+   - **RFC**: 12 or 13-character tax ID (e.g., XAXX010101000)
+   - **Tipo de persona**: Select **Física** (individual) or **Moral** (legal entity)
+   - **Regímenes fiscales**: Select applicable tax regimes (e.g., 601, 612, 626)
+5. Configure validation settings (optional):
+   - **Validar RFC en ingresos**: Verify RFC on income invoices
+   - **Validar RFC en gastos**: Verify RFC on expense invoices
+   - **Validar régimen fiscal**: Validate tax regime matches
+   - **Validar UUID duplicado**: Check for duplicate invoice UUIDs
+6. Click **Crear Perfil** to save
+
+<Note>
+You can create multiple profiles to manage different RFCs from the same account. This is especially useful for accountants managing multiple clients.
+</Note>
+
+</Step>
+
+<Step title="Upload your first invoice">
+
+Once your profile is created, you can start uploading CFDI XML files:
+
+1. Go to **Facturas** (Invoices) from the dashboard sidebar
+2. Select your profile from the profile selector dropdown
+3. Click **Subir XML** (Upload XML)
+4. Choose your CFDI XML file(s) - you can upload multiple files at once
+5. The system will automatically:
+   - Extract all data from the XML
+   - Validate the RFC and tax regime
+   - Check for duplicate UUIDs
+   - Calculate payment status for PPD invoices
+   - Display any warnings or errors
+
+<Note>
+Contafy automatically categorizes invoices as:
+- **PUE** (Pago en Una Exhibición): Payment in full
+- **PPD** (Pago en Parcialidades o Diferido): Deferred or partial payment
+- **COMPLEMENTO_PAGO**: Payment complement for PPD invoices
+</Note>
+
+</Step>
+
+<Step title="View your dashboard">
+
+After uploading invoices, explore your dashboard:
+
+1. Navigate to **Dashboard** from the sidebar
+2. Select the month, year, and profile you want to analyze
+3. View key metrics:
+   - **Total facturado**: Total invoiced amount
+   - **Total pagado**: Total paid amount
+   - **Pendiente por pagar**: Pending payments
+   - **Total de compras**: Total purchases/expenses
+   - **Gastos pendientes**: Pending expenses
+4. Explore interactive charts:
+   - Income vs expenses trends
+   - Payment status breakdown
+   - Monthly comparisons
+5. Filter by **Régimen Fiscal** (tax regime) if you have multiple regimes
+
+</Step>
+
+</Steps>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
+Now that you've set up your account and uploaded your first invoice, you can:
 
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+- **Upload expenses**: Track your business expenses by uploading expense XML files in the **Gastos** section
+- **Generate reports**: Export detailed reports to Excel or PDF from the **Reporte** section
+- **Search SAT database**: Use the **Búsqueda SAT** feature to search for invoices directly from SAT's database
+- **Manage multiple profiles**: Add more RFCs to manage multiple businesses or clients
+- **Configure validations**: Customize validation rules for each profile in the setup section
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+Need help with self-hosting? Check out the [installation guide](/installation) for detailed setup instructions.
 </Note>

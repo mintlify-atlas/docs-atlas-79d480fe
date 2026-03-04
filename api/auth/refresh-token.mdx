@@ -1,0 +1,76 @@
+---
+title: 'Refresh Token'
+api: 'POST /api/auth/refresh'
+description: 'Obtain a new access token using a refresh token'
+---
+
+Refreshes an expired access token using a valid refresh token. This endpoint allows users to maintain their session without requiring them to log in again.
+
+## Authentication
+
+No authentication required (uses refresh token in request body).
+
+## Request Body
+
+<ParamField body="refreshToken" type="string" required>
+  Valid refresh token obtained from the login endpoint.
+</ParamField>
+
+## Response
+
+<ResponseField name="accessToken" type="string">
+  New JWT access token for authenticating API requests. Include this in the `Authorization` header as `Bearer {accessToken}`.
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X POST https://api.contafy.com/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }'
+```
+
+## Example Response
+
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c3JfMWEyYjNjNGQ1ZTZmN2c4aCIsImlhdCI6MTcwNTMyMDAwMCwiZXhwIjoxNzA1MzIzNjAwfQ..."
+}
+```
+
+## Error Responses
+
+<ResponseField name="error" type="string">
+  Error type identifier.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable error message.
+</ResponseField>
+
+### Common Errors
+
+**401 Unauthorized**
+```json
+{
+  "error": "INVALID_TOKEN",
+  "message": "El refresh token es inválido o ha expirado"
+}
+```
+
+**400 Bad Request**
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "Refresh token es requerido"
+}
+```
+
+## Notes
+
+- Access tokens typically expire after 1 hour
+- Refresh tokens typically expire after 7 days
+- When a refresh token expires, the user must log in again
+- Store refresh tokens securely and never expose them in client-side code

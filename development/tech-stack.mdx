@@ -1,0 +1,446 @@
+---
+title: Tech stack
+description: Complete list of technologies and libraries used in Contafy
+---
+
+Contafy is built with modern web technologies focused on performance, type safety, and developer experience.
+
+## Core framework
+
+### Next.js 16
+
+**Why Next.js**: Full-stack React framework with built-in optimizations
+
+- **App Router**: File-based routing with nested layouts
+- **Server Components**: Zero-JavaScript-by-default rendering
+- **Image optimization**: Automatic image optimization
+- **Font optimization**: Built-in font loading (Geist)
+- **TypeScript**: First-class TypeScript support
+
+**Version**: `16.1.1`
+
+**Configuration**: `next.config.ts`
+
+```tsx
+const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/backend/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+      },
+    ];
+  },
+};
+```
+
+### React 19
+
+**Why React 19**: Latest React with improved performance and DX
+
+- **Concurrent features**: Improved rendering performance
+- **Server Components**: Native server component support
+- **Actions**: Built-in form handling
+- **Suspense**: Better async component handling
+
+**Version**: `19.2.3`
+
+### TypeScript 5
+
+**Why TypeScript**: Type safety and better IDE support
+
+**Configuration**: `tsconfig.json:3-7`
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+
+**Strict mode enabled**: No `any` types, required null checks
+
+## Styling and UI
+
+### Tailwind CSS 4
+
+**Why Tailwind**: Utility-first CSS framework for rapid UI development
+
+- **JIT mode**: Just-in-time compilation
+- **Custom theme**: Configured for dark mode
+- **PostCSS integration**: `@tailwindcss/postcss`
+
+**Version**: `^4` (latest)
+
+**Key utilities used**:
+
+- Responsive design: `md:`, `lg:` breakpoints
+- Dark mode: Built-in dark mode support
+- Custom colors: Primary green theme
+- Spacing system: Consistent spacing scale
+
+### Radix UI
+
+**Why Radix**: Unstyled, accessible UI primitives
+
+**Packages used**:
+
+- `@radix-ui/react-dialog`: Modal dialogs
+- `@radix-ui/react-dropdown-menu`: Dropdown menus
+- `@radix-ui/react-select`: Select inputs
+- `@radix-ui/react-tabs`: Tab navigation
+- `@radix-ui/react-avatar`: User avatars
+- `@radix-ui/react-progress`: Progress bars
+- `@radix-ui/react-switch`: Toggle switches
+- `@radix-ui/react-radio-group`: Radio buttons
+- `@radix-ui/react-separator`: Dividers
+- `@radix-ui/react-label`: Form labels
+- `@radix-ui/react-slot`: Component composition
+
+**Benefits**:
+
+- WCAG compliant accessibility
+- Keyboard navigation support
+- Screen reader support
+- Full styling control
+
+### Shadcn/ui
+
+**Why Shadcn/ui**: Pre-built components built on Radix UI
+
+**Location**: `components/ui/`
+
+**Components used**:
+
+- `button.tsx`: Button variants
+- `card.tsx`: Card containers
+- `table.tsx`: Data tables
+- `input.tsx`: Form inputs
+- `select.tsx`: Select dropdowns
+- `dialog.tsx`: Modal dialogs
+- `tabs.tsx`: Tab navigation
+- `badge.tsx`: Status badges
+- `progress.tsx`: Progress bars
+- `sonner.tsx`: Toast notifications
+
+**Configuration**: `components.json`
+
+### Lucide React
+
+**Why Lucide**: Lightweight, customizable icons
+
+**Version**: `^0.562.0`
+
+**Usage**: Over 50 icons used throughout the app
+
+```tsx
+import { Wallet, Check, FileText, BarChart3 } from 'lucide-react';
+```
+
+### Motion
+
+**Why Motion**: Animation library for React
+
+**Version**: `^12.27.1`
+
+**Used for**: Smooth transitions and micro-interactions
+
+## Data fetching and state
+
+### TanStack Query (React Query) 5
+
+**Why TanStack Query**: Powerful data synchronization for React
+
+**Version**: `^5.90.19`
+
+**Configuration**: `components/providers/ReactQueryProvider.tsx:11-24`
+
+```tsx
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+```
+
+**Features used**:
+
+- Query caching and invalidation
+- Automatic background refetching
+- Optimistic updates
+- Request deduplication
+- Loading and error states
+
+**Example usage**:
+
+```tsx
+const { data, isLoading } = useQuery({
+  queryKey: ['expenses', profileId, mes, año],
+  queryFn: () => getExpenses({ profileId, mes, año }),
+});
+```
+
+### React Hook Form
+
+**Why React Hook Form**: Performant form handling
+
+**Features**:
+
+- Minimal re-renders
+- Built-in validation
+- TypeScript support
+- Easy integration with UI libraries
+
+### Zod
+
+**Why Zod**: TypeScript-first schema validation
+
+**Usage**: Form validation with React Hook Form
+
+```tsx
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+```
+
+## Data visualization
+
+### Recharts
+
+**Why Recharts**: React charting library
+
+**Version**: `^3.6.0`
+
+**Used for**: Financial trend charts in dashboard
+
+**Components used**:
+
+- `LineChart`: Cash flow trends
+- `BarChart`: Monthly comparisons
+- `AreaChart`: Revenue visualization
+
+**Location**: `app/dashboard/components/FlowTrendChart.tsx`
+
+## File processing and export
+
+### ExcelJS
+
+**Why ExcelJS**: Excel file generation
+
+**Version**: `^4.4.0`
+
+**Usage**: Export financial reports to Excel format
+
+**Implementation**: `lib/excel/`
+
+### jsPDF
+
+**Why jsPDF**: PDF generation in the browser
+
+**Version**: `^4.0.0`
+
+**Usage**: Export financial reports to PDF
+
+**Implementation**: `lib/pdf/`
+
+### jspdf-autotable
+
+**Plugin**: Table generation for jsPDF
+
+**Version**: `^5.0.7`
+
+### html2canvas-pro
+
+**Why html2canvas-pro**: Convert HTML to canvas for PDF export
+
+**Version**: `^1.6.6`
+
+## Utilities
+
+### Class Variance Authority (CVA)
+
+**Why CVA**: Type-safe component variants
+
+**Version**: `^0.7.1`
+
+**Used in**: UI components for variant management
+
+```tsx
+const buttonVariants = cva('base-styles', {
+  variants: {
+    variant: {
+      default: 'bg-primary',
+      outline: 'border',
+    },
+  },
+});
+```
+
+### clsx
+
+**Why clsx**: Conditional className construction
+
+**Version**: `^2.1.1`
+
+```tsx
+clsx('base', condition && 'conditional', 'always');
+```
+
+### tailwind-merge
+
+**Why tailwind-merge**: Merge Tailwind classes without conflicts
+
+**Version**: `^3.4.0`
+
+**Combined with clsx** in `lib/utils.ts:4-6`:
+
+```tsx
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+### Sonner
+
+**Why Sonner**: Toast notifications for React
+
+**Version**: `^2.0.7`
+
+**Usage**: User feedback for actions
+
+```tsx
+import { toast } from 'sonner';
+
+toast.success('Factura guardada correctamente');
+toast.error('Error al guardar factura');
+```
+
+## Backend integration
+
+### Firebase
+
+**Why Firebase**: Authentication and cloud services
+
+**Version**: `^12.9.0`
+
+**Configuration**: `lib/firebase/config.ts`
+
+**Services used**:
+
+- Authentication
+- Cloud Storage
+- Analytics
+
+## Logging
+
+### Pino
+
+**Why Pino**: Fast JSON logger for Node.js
+
+**Version**: `^10.2.0`
+
+**Configuration**: `lib/utils/logger.ts`
+
+### pino-pretty
+
+**Dev tool**: Pretty print Pino logs
+
+**Version**: `^13.1.3`
+
+## Development tools
+
+### ESLint
+
+**Version**: `^9`
+
+**Configuration**: `eslint.config.mjs`
+
+**Extends**:
+
+- `eslint-config-next`: Next.js recommended rules
+- `eslint-config-prettier`: Disable conflicting rules
+
+### Prettier
+
+**Version**: `^3.8.1`
+
+**Plugins**:
+
+- `prettier-plugin-tailwindcss`: Sort Tailwind classes
+
+### Sharp
+
+**Image optimization**: Next.js image processing
+
+**Version**: `^0.34.5`
+
+## Package manager
+
+### pnpm
+
+**Why pnpm**: Fast, disk-efficient package manager
+
+**Required version**: 8 or higher
+
+**Workspace**: Configured with `pnpm-workspace.yaml`
+
+**Benefits**:
+
+- Faster installs than npm/yarn
+- Saves disk space
+- Strict dependency resolution
+
+## Runtime requirements
+
+### Node.js
+
+**Required version**: 20 or higher
+
+**Why Node 20**:
+
+- Native fetch support
+- Improved performance
+- Long-term support (LTS)
+
+## Environment variables
+
+**Required variables** (`.env.local`):
+
+```env
+# API Backend
+NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# Frontend URLs
+NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
+
+# Admin route (optional)
+ADMIN_DISCOUNT_ROUTE=internal/discount-management
+```
+
+## Build output
+
+**Production build**:
+
+```bash
+pnpm build
+```
+
+Generates optimized static and dynamic pages in `.next/`
+
+**Bundle analysis**:
+
+- Server Components: No client JavaScript
+- Client Components: Code-split automatically
+- Images: WebP/AVIF with responsive srcset
+
+See [Architecture](/development/architecture) for how these technologies work together.

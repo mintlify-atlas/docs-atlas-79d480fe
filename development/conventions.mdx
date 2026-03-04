@@ -1,0 +1,629 @@
+---
+title: Code conventions
+description: Coding standards and conventions used in the Contafy project
+---
+
+Contafy follows strict coding conventions to ensure consistency, maintainability, and code quality across the entire codebase.
+
+## TypeScript conventions
+
+### Strict mode
+
+Contafy uses TypeScript strict mode (enabled in `tsconfig.json:7`):
+
+```json
+{
+  "compilerOptions": {
+    "strict": true
+  }
+}
+```
+
+**This means**:
+
+- No implicit `any` types
+- Strict null checks
+- Strict function types
+- Strict property initialization
+
+### No `any` type
+
+**Never use `any`**. Instead:
+
+```tsx
+// Bad
+function process(data: any) {
+  return data.value;
+}
+
+// Good - use specific types
+function process(data: Invoice) {
+  return data.total;
+}
+
+// Good - use unknown for truly unknown types
+function process(data: unknown) {
+  if (typeof data === 'object' && data !== null && 'value' in data) {
+    return data.value;
+  }
+}
+```
+
+### Interfaces over types
+
+Prefer interfaces for object shapes:
+
+```tsx
+// Bad
+type User = {
+  id: string;
+  name: string;
+};
+
+// Good
+interface User {
+  id: string;
+  name: string;
+}
+```
+
+**Use `type` for**:
+
+- Unions: `type Status = 'pending' | 'active' | 'completed'`
+- Intersections: `type Combined = User & Profile`
+- Primitives: `type ID = string`
+- Mapped types: `type Readonly<T> = { readonly [P in keyof T]: T[P] }`
+
+### Type exports
+
+Export types separately from values:
+
+```tsx
+// lib/types/invoices.ts
+export interface Invoice {
+  id: string;
+  total: number;
+}
+
+export interface GetInvoicesResponse {
+  data: Invoice[];
+  pagination: Pagination;
+}
+```
+
+Import types with `type` keyword:
+
+```tsx
+import type { Invoice } from '@/lib/types/invoices';
+```
+
+## Naming conventions
+
+### Files and folders
+
+- **Component files**: PascalCase - `DashboardHeader.tsx`
+- **Utility files**: camelCase - `pdf-export.ts`
+- **Type files**: camelCase - `invoices.ts`
+- **Folders**: kebab-case - `dashboard/`, `api-client/`
+- **Special Next.js files**: lowercase - `page.tsx`, `layout.tsx`, `error.tsx`
+
+### Variables and functions
+
+- **Variables**: camelCase - `const userName = 'John'`
+- **Constants**: UPPER_SNAKE_CASE - `const MAX_RETRIES = 3`
+- **Functions**: camelCase - `function getUserData() {}`
+- **Boolean variables**: Use auxiliary verbs
+  - `isLoading`, `hasError`, `canEdit`, `shouldRefetch`
+  - **Never**: `loading`, `error`, `edit`, `refetch`
+
+### Components
+
+- **Components**: PascalCase - `function DashboardHeader() {}`
+- **Component files**: Match component name - `DashboardHeader.tsx`
+- **Props interfaces**: `ComponentNameProps`
+
+```tsx
+interface DashboardHeaderProps {
+  title: string;
+  subtitle?: string;
+}
+
+export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
+  // ...
+}
+```
+
+### Types and interfaces
+
+- **Interfaces**: PascalCase - `interface Invoice {}`
+- **Type aliases**: PascalCase - `type Status = 'pending' | 'active'`
+- **Generics**: Single uppercase letter or PascalCase - `T`, `TData`, `TError`
+
+## Component patterns
+
+### Server Components (default)
+
+Components are Server Components by default (no `'use client'`):
+
+```tsx
+// app/dashboard/page.tsx
+export default async function DashboardPage() {
+  // Can await data directly
+  const data = await getData();
+  
+  return <DashboardContent data={data} />;
+}
+```
+
+**Use Server Components for**:
+
+- Pages
+- Layouts
+- Data fetching
+- Static content
+- SEO-critical content
+
+### Client Components ('use client')
+
+Only add `'use client'` when necessary:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+
+export function InteractiveForm() {
+  const [value, setValue] = useState('');
+  
+  return <input value={value} onChange={(e) => setValue(e.target.value)} />;
+}
+```
+
+**Use Client Components for**:
+
+- Event handlers (onClick, onChange)
+- React hooks (useState, useEffect, useQuery)
+- Browser APIs (localStorage, window)
+- Interactive UI
+
+### Component composition
+
+Follow the Container/Presentational pattern:
+
+```tsx
+// Container: Handles data and logic
+export async function DashboardContent({ profileId }) {
+  const metrics = await getMetrics(profileId);
+  
+  return <MetricsDisplay metrics={metrics} />;
+}
+
+// Presentational: Pure UI rendering
+interface MetricsDisplayProps {
+  metrics: Metrics;
+}
+
+export function MetricsDisplay({ metrics }: MetricsDisplayProps) {
+  return (
+    <div>
+      <h2>Metrics</h2>
+      <p>Total: {metrics.total}</p>
+    </div>
+  );
+}
+```
+
+### Props destructuring
+
+Always destructure props in function signature:
+
+```tsx
+// Bad
+export function Button(props: ButtonProps) {
+  return <button className={props.className}>{props.children}</button>;
+}
+
+// Good
+export function Button({ className, children }: ButtonProps) {
+  return <button className={className}>{children}</button>;
+}
+```
+
+### Default props
+
+Use default parameters:
+
+```tsx
+interface ButtonProps {
+  variant?: 'primary' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export function Button({ 
+  variant = 'primary', 
+  size = 'md' 
+}: ButtonProps) {
+  // ...
+}
+```
+
+## File organization
+
+### Import order
+
+Group imports in this order:
+
+1. **React and Next.js**
+2. **External packages**
+3. **Internal components**
+4. **Internal utilities**
+5. **Types**
+6. **Styles** (if any)
+
+```tsx
+// 1. React and Next.js
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+// 2. External packages
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+// 3. Internal components
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+
+// 4. Internal utilities
+import { cn } from '@/lib/utils';
+import { getInvoices } from '@/lib/api/invoices.client';
+
+// 5. Types
+import type { Invoice } from '@/lib/types/invoices';
+
+// 6. Styles (if needed)
+import './styles.css';
+```
+
+### Export patterns
+
+**Prefer named exports**:
+
+```tsx
+// Good
+export function DashboardHeader() {}
+
+// Avoid (except for pages)
+export default function DashboardHeader() {}
+```
+
+**Pages must use default export** (Next.js requirement):
+
+```tsx
+// app/dashboard/page.tsx
+export default function DashboardPage() {
+  return <div>Dashboard</div>;
+}
+```
+
+## Functional programming
+
+### No classes
+
+Use functions instead of classes:
+
+```tsx
+// Bad
+class DataFetcher {
+  async fetchData() {
+    return await fetch('/api/data');
+  }
+}
+
+// Good
+async function fetchData() {
+  return await fetch('/api/data');
+}
+```
+
+### Pure functions
+
+Prefer pure functions (no side effects):
+
+```tsx
+// Pure function - same input always produces same output
+function calculateTotal(items: Item[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+
+// Side effects - document clearly or avoid
+function saveToLocalStorage(key: string, value: string): void {
+  localStorage.setItem(key, value); // Side effect
+}
+```
+
+### Immutability
+
+Avoid mutating data:
+
+```tsx
+// Bad
+function addItem(items: Item[], newItem: Item) {
+  items.push(newItem); // Mutates array
+  return items;
+}
+
+// Good
+function addItem(items: Item[], newItem: Item) {
+  return [...items, newItem]; // Returns new array
+}
+```
+
+## React patterns
+
+### Hooks
+
+Follow React hooks rules:
+
+1. Only call hooks at the top level
+2. Only call hooks from React functions
+3. Use ESLint plugin to enforce rules
+
+```tsx
+function useInvoices(profileId?: string) {
+  // All hooks at top level
+  const [search, setSearch] = useState('');
+  const router = useRouter();
+  
+  const { data, isLoading } = useQuery({
+    queryKey: ['invoices', profileId, search],
+    queryFn: () => getInvoices({ profileId, search }),
+  });
+  
+  return { data, isLoading, search, setSearch };
+}
+```
+
+### Custom hooks
+
+Extract reusable logic into custom hooks:
+
+```tsx
+// lib/hooks/useSubscription.ts
+export function useSubscription() {
+  const { data } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: getSubscription,
+  });
+  
+  const isActive = data?.status === 'active';
+  const isTrial = data?.status === 'trial';
+  
+  return { subscription: data, isActive, isTrial };
+}
+```
+
+### Error boundaries
+
+Use error.tsx files for route-level error handling:
+
+```tsx
+// app/dashboard/error.tsx
+'use client';
+
+export default function DashboardError({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  return (
+    <div>
+      <h2>Something went wrong</h2>
+      <button onClick={reset}>Try again</button>
+    </div>
+  );
+}
+```
+
+## Styling conventions
+
+### Tailwind CSS
+
+Use Tailwind utility classes:
+
+```tsx
+<div className="flex items-center gap-4 rounded-lg bg-primary p-4">
+  <h2 className="text-lg font-semibold">Title</h2>
+</div>
+```
+
+### Class merging
+
+Use `cn()` utility for conditional classes:
+
+```tsx
+import { cn } from '@/lib/utils';
+
+<button
+  className={cn(
+    'rounded px-4 py-2',
+    variant === 'primary' && 'bg-primary text-white',
+    variant === 'secondary' && 'bg-secondary text-black',
+    isDisabled && 'opacity-50 cursor-not-allowed'
+  )}
+>
+  Click me
+</button>
+```
+
+### Responsive design
+
+Mobile-first approach:
+
+```tsx
+<div className="
+  grid grid-cols-1         // Mobile: 1 column
+  md:grid-cols-2          // Tablet: 2 columns
+  lg:grid-cols-3          // Desktop: 3 columns
+  gap-4
+">
+  {items.map(item => <Card key={item.id} />)}
+</div>
+```
+
+## Comments and documentation
+
+### When to comment
+
+Comment **why**, not **what**:
+
+```tsx
+// Bad - obvious from code
+// Set loading to true
+setIsLoading(true);
+
+// Good - explains reasoning
+// Prevent multiple simultaneous refresh requests
+if (isRefreshing && refreshPromise) {
+  return refreshPromise;
+}
+```
+
+### JSDoc for public APIs
+
+Document public functions with JSDoc:
+
+```tsx
+/**
+ * Fetches invoices with optional filters
+ * @param params - Query parameters for filtering
+ * @returns Promise resolving to invoices and pagination
+ */
+export async function getInvoices(
+  params: GetInvoicesParams
+): Promise<GetInvoicesResponse> {
+  // ...
+}
+```
+
+### TODO comments
+
+Use TODO for future improvements:
+
+```tsx
+// TODO: Add pagination support
+// TODO: Implement caching strategy
+// FIXME: This calculation is incorrect for edge case
+```
+
+## Error handling
+
+### Try-catch for async operations
+
+```tsx
+try {
+  const data = await fetchData();
+  return data;
+} catch (error) {
+  if (error instanceof ApiError) {
+    toast.error(error.message);
+  } else {
+    toast.error('An unexpected error occurred');
+  }
+  throw error;
+}
+```
+
+### Type-safe error handling
+
+```tsx
+if (error instanceof ApiError) {
+  console.error('API error:', error.status, error.message);
+} else if (error instanceof Error) {
+  console.error('Error:', error.message);
+} else {
+  console.error('Unknown error:', error);
+}
+```
+
+## Performance best practices
+
+### Avoid unnecessary re-renders
+
+Use React.memo for expensive components:
+
+```tsx
+import { memo } from 'react';
+
+export const ExpensiveChart = memo(function ExpensiveChart({ data }) {
+  // Complex chart rendering
+  return <Chart data={data} />;
+});
+```
+
+### Use useCallback and useMemo
+
+```tsx
+const handleClick = useCallback(() => {
+  // Callback logic
+}, [dependencies]);
+
+const expensiveValue = useMemo(() => {
+  return computeExpensiveValue(data);
+}, [data]);
+```
+
+### Dynamic imports for heavy components
+
+```tsx
+import dynamic from 'next/dynamic';
+
+const HeavyChart = dynamic(() => import('./HeavyChart'), {
+  loading: () => <LoadingSpinner />,
+});
+```
+
+## Testing conventions
+
+While Contafy doesn't currently have comprehensive tests, follow these patterns when adding tests:
+
+```tsx
+// Component.test.tsx
+import { render, screen } from '@testing-library/react';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('renders with text', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+});
+```
+
+## Git conventions
+
+### Commit messages
+
+Follow conventional commits:
+
+```
+feat: add invoice filtering
+fix: resolve token refresh loop
+docs: update API documentation
+refactor: simplify data fetching logic
+style: format code with prettier
+test: add tests for invoice API
+chore: update dependencies
+```
+
+### Branch naming
+
+```
+feature/invoice-filtering
+bugfix/token-refresh-loop
+hotfix/critical-security-issue
+refactor/api-client-architecture
+```
+
+See [Deployment](/development/deployment) for production deployment guidelines.

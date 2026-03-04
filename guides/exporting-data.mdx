@@ -1,0 +1,553 @@
+---
+title: Exporting data
+description: Learn how to export invoices, expenses, and reports to PDF and Excel formats
+---
+
+Contafy provides powerful export features to share financial data with accountants, generate reports for stakeholders, and maintain external backups. Export to PDF for presentations or Excel for detailed analysis.
+
+## Export formats
+
+Contafy supports two primary export formats:
+
+### PDF exports
+
+- **Best for**: Formal reports, presentations, client sharing
+- **Features**: Formatted tables, summary metrics, professional layout
+- **Availability**: PROFESSIONAL and ENTERPRISE plans
+- **Use cases**: Monthly reports, tax documentation, stakeholder presentations
+
+### Excel exports
+
+- **Best for**: Data analysis, accounting software integration, spreadsheet work
+- **Features**: Raw data in columns, formulas preserved, easy filtering
+- **Availability**: PROFESSIONAL and ENTERPRISE plans
+- **Use cases**: Detailed analysis, importing to accounting software, custom reports
+
+<Note>
+  Export features are premium functionality. FREE and STARTER plans will see an upgrade prompt when attempting to export.
+</Note>
+
+## Exporting invoices to PDF
+
+Generate professional PDF reports of your income invoices.
+
+### From the invoices page
+
+<Steps>
+  <Step title="Navigate to the invoices page">
+    Go to **Ingresos** → **Facturas** or visit `/dashboard/invoices`.
+  </Step>
+
+  <Step title="Apply filters">
+    Select the data you want to export:
+    
+    - **Perfil**: Choose a specific RFC or "Todos"
+    - **Mes**: Select the month
+    - **Año**: Select the year
+    - **Régimen fiscal**: Filter by tax regime (optional)
+    - **Búsqueda**: Search for specific invoices (optional)
+  </Step>
+
+  <Step title="Click 'Exportar PDF'">
+    In the page header, click the "Exportar PDF" button.
+  </Step>
+
+  <Step title="Wait for generation">
+    The system:
+    1. Retrieves all matching invoices
+    2. Normalizes payment data
+    3. Generates the PDF with formatted tables
+    4. Automatically downloads the file
+  </Step>
+</Steps>
+
+### PDF invoice report contents
+
+The generated PDF includes:
+
+#### Header section
+- Your business name and RFC
+- Report title ("Reporte de Facturas")
+- Selected period (e.g., "Diciembre 2025")
+- Generation date and time
+
+#### Resumen financiero (Financial summary)
+- **Total facturado**: Sum of all invoice subtotals
+- **Total pagado**: Sum of paid invoices
+- **Pendiente por pagar**: Unpaid amount
+- **Total de facturas**: Invoice count
+- **Facturas PUE**: Count of single-payment invoices
+- **Facturas PPD**: Count of deferred-payment invoices
+
+#### Facturas pendientes de pago (Pending invoices)
+
+Table showing unpaid or partially paid PPD invoices:
+- UUID
+- Fecha de emisión
+- Cliente (receptor)
+- Monto
+- Pagado
+- Pendiente
+- Estado de pago
+
+#### Facturas pagadas (Paid invoices)
+
+Table showing fully paid invoices (PUE and paid PPD):
+- UUID
+- Fecha de emisión
+- Cliente
+- Monto
+- IVA trasladado
+- Retenciones (IVA/ISR)
+- Total
+
+#### Footer
+- Page numbers
+- Generation timestamp
+- Powered by Contafy
+
+<Tip>
+  The PDF uses color-coding: yellow for pending invoices, green for paid invoices, making it easy to identify payment status at a glance.
+</Tip>
+
+## Exporting invoices to Excel
+
+Export invoice data to Excel spreadsheets for analysis and integration.
+
+### From the invoices page
+
+<Steps>
+  <Step title="Go to the invoices page">
+    Navigate to `/dashboard/invoices`.
+  </Step>
+
+  <Step title="Apply your filters">
+    Select the profile, time period, and any additional filters.
+  </Step>
+
+  <Step title="Click 'Exportar Excel'">
+    In the page header, click the "Exportar Excel" button.
+  </Step>
+
+  <Step title="Download the file">
+    An Excel file (.xlsx) is generated and downloaded automatically.
+  </Step>
+</Steps>
+
+### Excel invoice file structure
+
+#### Worksheet: Resumen (Summary)
+- Total facturado
+- Total pagado
+- Pendiente por pagar
+- Total de facturas
+- Facturas PUE
+- Facturas PPD
+- Period information
+
+#### Worksheet: Facturas (Invoices)
+
+Columns:
+- **UUID**: Invoice unique identifier
+- **Folio**: Internal folio number
+- **Fecha**: Invoice date (formatted)
+- **Emisor**: Your business name
+- **RFC Emisor**: Your RFC
+- **Receptor**: Client name
+- **RFC Receptor**: Client RFC
+- **Tipo**: PUE, PPD, or COMPLEMENTO_PAGO
+- **Subtotal**: Amount before tax
+- **IVA Trasladado**: IVA charged
+- **Retención IVA**: IVA retention
+- **Retención ISR**: ISR retention
+- **Total**: Final amount
+- **Estado de Pago**: Payment status
+- **Monto Pagado**: Amount paid (for PPD)
+- **Fecha de Pago**: Payment date (if applicable)
+
+<Note>
+  Excel exports include all columns, not just the visible ones. This gives you maximum flexibility for analysis.
+</Note>
+
+## Exporting expenses to PDF
+
+Generate expense reports in PDF format.
+
+### From the expenses page
+
+<Steps>
+  <Step title="Navigate to expenses">
+    Go to **Gastos** → **Gastos** or visit `/dashboard/expenses`.
+  </Step>
+
+  <Step title="Configure filters">
+    Select:
+    - Profile (specific RFC or all)
+    - Time period (month and year)
+    - Régimen fiscal (optional)
+    - Category filter (optional)
+  </Step>
+
+  <Step title="Click 'Exportar PDF'">
+    In the page header, click the "Exportar PDF" button.
+  </Step>
+
+  <Step title="Download the report">
+    The PDF generates and downloads automatically.
+  </Step>
+</Steps>
+
+### PDF expense report contents
+
+#### Header
+- Business name and RFC
+- Report title ("Reporte de Gastos")
+- Period (month and year)
+- Generation timestamp
+
+#### Resumen de gastos (Expense summary)
+- **Total gastado**: Sum of all expense subtotals
+- **Total de gastos**: Expense count
+- **Gastos XML**: Count of CFDI expenses
+- **Gastos manuales**: Count of manual entries
+
+#### Breakdown by category (if applicable)
+- Viáticos
+- Oficina
+- Servicios
+- Transporte
+- Alimentación
+
+#### Gastos detallados (Detailed expenses)
+
+Table showing all expenses:
+- UUID / Folio
+- Fecha
+- Proveedor (emisor)
+- Concepto
+- Categoría
+- Subtotal
+- IVA
+- Total
+- Origen (XML/Manual)
+
+<Tip>
+  Expense PDFs use purple color scheme to distinguish them from invoice reports (blue) and combined reports (multicolor).
+</Tip>
+
+## Exporting expenses to Excel
+
+Export expense data for spreadsheet analysis.
+
+<Steps>
+  <Step title="Go to expenses page">
+    Visit `/dashboard/expenses`.
+  </Step>
+
+  <Step title="Apply filters">
+    Select profile, period, and any category filters.
+  </Step>
+
+  <Step title="Click 'Exportar Excel'">
+    Click the "Exportar Excel" button in the header.
+  </Step>
+
+  <Step title="Open the downloaded file">
+    An Excel file downloads with expense data.
+  </Step>
+</Steps>
+
+### Excel expense file structure
+
+#### Worksheet: Resumen
+- Total gastado
+- Total de gastos
+- Gastos XML
+- Gastos manuales
+- Period information
+- Category breakdown (if applicable)
+
+#### Worksheet: Gastos
+
+Columns:
+- **UUID**: Expense identifier
+- **Folio**: Internal reference
+- **Fecha**: Expense date
+- **Emisor**: Vendor/supplier name
+- **RFC Emisor**: Vendor RFC
+- **Receptor**: Your business name
+- **RFC Receptor**: Your RFC
+- **Concepto**: Expense description
+- **Categoría**: Assigned category
+- **Subtotal**: Amount before tax
+- **IVA**: Tax amount
+- **Total**: Final amount
+- **Origen**: XML or Manual
+- **Notas**: Additional notes (for manual expenses)
+
+## Exporting combined reports
+
+Generate comprehensive financial reports including both income and expenses.
+
+### From the dashboard
+
+<Steps>
+  <Step title="Navigate to the dashboard">
+    Go to `/dashboard`.
+  </Step>
+
+  <Step title="Configure filters">
+    Select:
+    - Profile (specific or all)
+    - Month and year
+    - Régimen fiscal (if applicable)
+  </Step>
+
+  <Step title="Click 'Exportar PDF'">
+    In the top right, click the "Exportar PDF" button.
+  </Step>
+
+  <Step title="Wait for processing">
+    The system:
+    1. Fetches invoices for the period
+    2. Fetches expenses for the period
+    3. Calculates all metrics
+    4. Generates a comprehensive PDF
+    5. Automatically downloads it
+  </Step>
+</Steps>
+
+### Combined PDF report contents
+
+#### Financial summary
+- **Total facturado**: Sum of all income
+- **Total pagado**: Paid invoices
+- **Pendiente por pagar**: Unpaid invoices
+- **Total de compras**: Sum of all expenses
+- **Diferencia**: Net income (income - expenses)
+
+The Diferencia is color-coded:
+- **Green**: Positive (profit)
+- **Red**: Negative (loss)
+
+#### Income section
+
+Tables for:
+1. **Facturas pendientes** (yellow section)
+2. **Facturas pagadas** (green section)
+
+#### Expense section (purple)
+
+Table showing all expenses with categories.
+
+#### Net income calculation
+
+Clear calculation showing:
+```
+Total Facturado:     $XXX,XXX.XX
+Total Compras:       $XXX,XXX.XX
+-----------------------------------
+Diferencia:          $XXX,XXX.XX
+```
+
+<Note>
+  Combined reports are ideal for monthly closing, tax preparation, and stakeholder presentations.
+</Note>
+
+## Preview before exporting
+
+Before downloading a PDF, preview it in your browser.
+
+### Accessing preview
+
+<Steps>
+  <Step title="Navigate to the report page">
+    Go to invoices, expenses, or dashboard.
+  </Step>
+
+  <Step title="Apply filters">
+    Select the data you want to preview.
+  </Step>
+
+  <Step title="Click 'Vista previa'">
+    Instead of "Exportar PDF", click "Vista previa" (if available) or click "Exportar PDF" and then click the preview link.
+  </Step>
+
+  <Step title="Review the report">
+    A new page opens showing the formatted report exactly as it will appear in the PDF.
+  </Step>
+
+  <Step title="Export or go back">
+    - Click "Exportar PDF" to download
+    - Click "Volver" to return and adjust filters
+  </Step>
+</Steps>
+
+<Tip>
+  Previewing helps ensure the report contains the correct data before sharing with clients or accountants.
+</Tip>
+
+## Export profiles
+
+Export a list of all your RFC profiles for backup or documentation.
+
+<Steps>
+  <Step title="Go to setup page">
+    Navigate to `/dashboard/setup` → "Perfiles" tab.
+  </Step>
+
+  <Step title="Click 'Exportar perfiles'">
+    Look for an export button (if available) or request the feature.
+  </Step>
+
+  <Step title="Download PDF">
+    A PDF containing all profile information downloads.
+  </Step>
+</Steps>
+
+The profile export includes:
+- Profile name and RFC
+- Tipo de persona
+- Regímenes fiscales
+- Creation date
+- Statistics (total invoices, expenses, dates)
+
+<Warning>
+  Profile exports do not include sensitive validation settings or frozen status details. Use this for high-level documentation only.
+</Warning>
+
+## Best practices
+
+### Regular exports
+
+- Export reports at the end of each month
+- Keep copies in a secure, backed-up location
+- Share with your accountant for tax preparation
+
+### Consistent naming
+
+When saving exported files, use a consistent naming convention:
+```
+[Business]_[Type]_[Period].pdf
+Example: MiEmpresa_Facturas_Dic2025.pdf
+```
+
+### Verify data before exporting
+
+- Review the invoice/expense list before exporting
+- Check for validation errors
+- Ensure all data is uploaded for the period
+- Confirm filters are correct
+
+### Use appropriate format
+
+- **PDF**: For presentations, reports, and formal documentation
+- **Excel**: For analysis, integration, and detailed review
+
+### Archive systematically
+
+Create a folder structure:
+```
+/Contafy_Exports/
+  /2025/
+    /Enero/
+      Facturas_Ene2025.pdf
+      Gastos_Ene2025.pdf
+      Completo_Ene2025.pdf
+    /Febrero/
+      ...
+```
+
+## Export limitations
+
+### Plan restrictions
+
+| Plan | PDF Export | Excel Export |
+|------|-----------|-------------|
+| FREE | ❌ No | ❌ No |
+| STARTER | ❌ No | ❌ No |
+| PROFESSIONAL | ✅ Yes | ✅ Yes |
+| ENTERPRISE | ✅ Yes | ✅ Yes |
+
+### Data limits
+
+Exports are subject to reasonable data limits:
+- **Maximum invoices**: 5,000 per export
+- **Maximum expenses**: 5,000 per export
+- **PDF file size**: ~10 MB maximum
+- **Excel file size**: ~25 MB maximum
+
+If you exceed limits:
+1. Export smaller date ranges
+2. Filter by profile
+3. Split into multiple exports
+
+<Note>
+  For very large datasets, consider using the API for programmatic exports or contact support for assistance.
+</Note>
+
+## Troubleshooting
+
+### "Exportación no disponible en tu plan"
+
+You're on FREE or STARTER plan. To export:
+1. Upgrade to PROFESSIONAL or ENTERPRISE
+2. Go to **Configuración** → **Suscripción**
+3. Select a plan with export features
+
+### PDF generation takes too long
+
+For large datasets, PDF generation can take 10-30 seconds. If it times out:
+1. Reduce the date range
+2. Filter by a specific profile
+3. Split into multiple smaller exports
+
+### Excel file won't open
+
+Ensure you have compatible software:
+- Microsoft Excel 2010 or later
+- LibreOffice Calc
+- Google Sheets (upload the file)
+
+### Exported data doesn't match screen
+
+If numbers differ:
+1. Verify filters are the same
+2. Clear browser cache and retry
+3. Check if data was modified between viewing and export
+4. Ensure no validation errors on invoices/expenses
+
+### Download doesn't start
+
+Check browser settings:
+1. Allow pop-ups from Contafy
+2. Enable automatic downloads
+3. Check your downloads folder
+4. Disable ad blockers temporarily
+
+## Advanced: Automated exports via API
+
+For automated, programmatic exports, use the Contafy API.
+
+### API endpoints for export
+
+- `GET /api/invoices/export`: Export invoices as JSON
+- `GET /api/expenses/export`: Export expenses as JSON
+- `GET /api/profiles/export`: Export profile data
+
+See the [API Reference](/api-reference/introduction) for details on authentication, parameters, and response formats.
+
+<Tip>
+  API exports return JSON data, which you can process in your own scripts to generate custom reports or integrate with third-party software.
+</Tip>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Integrate Contafy with your accounting systems
+  </Card>
+  <Card title="Subscription plans" icon="crown" href="/features/subscription-plans">
+    Compare plans and upgrade for export features
+  </Card>
+</CardGroup>

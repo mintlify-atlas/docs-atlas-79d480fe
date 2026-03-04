@@ -1,0 +1,317 @@
+---
+title: Usage limits
+description: Understand Contafy plan limits, monitoring usage, and what happens when you reach your limits
+---
+
+Every Contafy subscription plan includes specific usage limits based on your tier. This guide explains how limits work, how to monitor your usage, and what happens when you reach your limits.
+
+## Understanding plan limits
+
+Contafy enforces limits across several resource types to ensure fair usage and system performance. Limits are enforced based on your subscription plan.
+
+### Limit types
+
+The platform tracks the following usage metrics:
+
+| Limit Type | Description | Reset Period |
+| --- | --- | --- |
+| **Profiles (RFCs)** | Number of issuer tax IDs you can manage | Never (cumulative) |
+| **Invoice XML files** | XML invoices you can upload | Monthly |
+| **Expense XML files** | XML expenses you can upload | Monthly |
+| **Total XML files** | Combined invoices + expenses | Monthly |
+| **AI searches** | SAT searches using AI features | Monthly |
+| **SAT search results** | Maximum results per individual search | Per search |
+
+<Info>
+Monthly limits reset on the 1st day of each calendar month at 00:00 UTC-6 (Mexico City time).
+</Info>
+
+## Plan-specific limits
+
+### Free plan limits
+
+- **Profiles**: 1 RFC emisor
+- **Invoice XML files**: 25 per month
+- **Expense XML files**: 25 per month
+- **Total XML files**: 50 per month
+- **AI searches**: 5 per month
+- **SAT search results**: Maximum 2 results per search
+- **PDF export**: Not available
+- **Excel export**: Not available
+- **API access**: Not available
+
+### Básico plan limits
+
+- **Profiles**: 3 RFC emisores
+- **Invoice XML files**: 250 per month
+- **Expense XML files**: 250 per month
+- **Total XML files**: 500 per month
+- **AI searches**: 100 per month
+- **SAT search results**: Maximum 5 results per search
+- **PDF export**: Available
+- **Excel export**: Not available
+- **API access**: Not available
+
+### Pro plan limits
+
+- **Profiles**: 10 RFC emisores
+- **Invoice XML files**: Unlimited
+- **Expense XML files**: Unlimited
+- **Total XML files**: Unlimited
+- **AI searches**: Unlimited
+- **SAT search results**: Unlimited
+- **PDF export**: Available
+- **Excel export**: Available
+- **API access**: Available
+
+### Empresarial plan limits
+
+- **Profiles**: Unlimited RFC emisores
+- **Invoice XML files**: Unlimited
+- **Expense XML files**: Unlimited
+- **Total XML files**: Unlimited
+- **AI searches**: Unlimited
+- **SAT search results**: Unlimited
+- **PDF export**: Available
+- **Excel export**: Available
+- **API access**: Available
+- **Multi-user access**: Available with role-based permissions
+
+## Monitoring your usage
+
+### Consumption card
+
+Track your current usage in the dashboard:
+
+1. Navigate to **Dashboard** > **Setup** > **Subscription**
+2. View the **Consumo del Mes** (Monthly consumption) card
+3. Monitor usage across all tracked resources
+
+The consumption card displays:
+
+- **Current usage** vs. **limit** for each resource
+- **Progress bars** showing percentage of limit used
+- **Remaining quota** for limited resources
+- Real-time updates as you use resources
+
+### What the consumption card shows
+
+#### XML files uploaded
+
+```
+Archivos XML subidos: 127 / 500
+[████████░░░░░░░░░░░░] 25%
+```
+
+Combined total of invoice and expense XML files uploaded during the current month.
+
+#### Billing profiles (RFCs)
+
+```
+Perfiles de Facturación (RFCs): 2 / 3
+[█████████████░░░░░░░] 66%
+```
+
+Number of issuer RFC profiles you've created vs. your plan limit.
+
+#### SAT AI searches
+
+```
+Búsquedas SAT con IA: 47 / 100
+47 búsquedas restantes este mes
+[█████████░░░░░░░░░░░] 47%
+```
+
+AI-powered searches used this month (only shown for plans with AI search limits).
+
+<Note>
+The consumption card only displays metrics that have limits in your plan. Unlimited resources are not shown.
+</Note>
+
+## What happens when you reach limits
+
+### XML file upload limits
+
+When you reach your monthly XML file limit:
+
+- **Upload blocked**: You cannot upload additional XML files
+- **Error message**: Clear notification explaining the limit
+- **Existing data**: All previously uploaded files remain accessible
+- **Features available**: You can still view, search, and export existing data
+- **Reset timing**: Limit resets on the 1st of next month
+
+#### Workaround options
+
+1. **Wait for reset**: Monthly limits reset automatically on the 1st
+2. **Upgrade plan**: Increase limits by upgrading to a higher tier
+3. **Delete old files**: Free up quota by removing unnecessary files (if applicable)
+
+### Profile (RFC) limits
+
+When you reach your profile limit:
+
+- **Creation blocked**: Cannot add new RFC emisor profiles
+- **Existing profiles**: All current profiles remain functional
+- **Upgrade prompt**: System suggests upgrading to add more profiles
+
+#### Managing profile limits
+
+- **Free plan**: Limited to 1 RFC (cannot add more without upgrading)
+- **Básico plan**: Can manage up to 3 RFCs
+- **Pro plan**: Can manage up to 10 RFCs
+- **Empresarial plan**: Unlimited RFC profiles
+
+### AI search limits
+
+When you reach your AI search limit:
+
+- **AI features disabled**: AI-powered search features become unavailable
+- **Basic search available**: Standard SAT search continues to work
+- **Limit notification**: Dashboard shows remaining AI searches
+- **Monthly reset**: AI search quota resets on the 1st of each month
+
+### Feature-based limits
+
+Certain features are entirely restricted by plan tier:
+
+#### PDF export
+
+- **Free plan**: Feature unavailable
+- **Básico and above**: Feature available
+- **Behavior**: Export button shows upgrade modal on Free plan
+
+#### Excel export
+
+- **Free & Básico plans**: Feature unavailable
+- **Pro and above**: Feature available
+- **Behavior**: Export button shows upgrade modal on lower tiers
+
+#### API access
+
+- **Free & Básico plans**: API endpoints return 403 Forbidden
+- **Pro and above**: Full API access
+- **Authentication**: API key required regardless of plan
+
+## Upgrade prompts
+
+When you attempt to use a feature or resource beyond your plan limits:
+
+### Upgrade modal
+
+A modal appears with:
+
+- **Feature description**: What you're trying to access
+- **Recommended plan**: Suggested tier that includes the feature
+- **Plan details**: Features and pricing of recommended plan
+- **Trial information**: 30-day trial details for paid plans
+- **Quick upgrade**: Direct link to subscription settings
+
+Example upgrade modal triggers:
+
+- Attempting to add a profile beyond limit
+- Trying to upload XML files after reaching monthly limit
+- Clicking PDF export on Free plan
+- Clicking Excel export on Free or Básico plans
+- Accessing API without proper plan tier
+
+## Best practices for managing limits
+
+### Monitor usage regularly
+
+- Check the consumption card weekly
+- Set personal reminders when approaching limits
+- Plan upgrades before hitting critical limits
+
+### Optimize resource usage
+
+- **Batch uploads**: Upload multiple files at once near month-end if close to limit
+- **Archive old profiles**: Remove unused RFC profiles if at limit (contact support)
+- **Strategic AI searches**: Use basic search when AI isn't necessary
+
+### Plan ahead for growth
+
+- Track monthly usage trends
+- Upgrade proactively before hitting limits regularly
+- Consider annual billing for cost savings
+
+### Understand reset timing
+
+Monthly limits reset on the **1st of each month** at midnight Mexico City time:
+
+- XML file counters reset to 0
+- AI search quota fully restored
+- Plan for high-volume uploads early in the month
+
+## Limit enforcement in API
+
+When using the Contafy API, limits are enforced via HTTP response codes:
+
+### 403 Forbidden
+
+Returned when:
+
+- Feature not available in your plan
+- Plan doesn't include API access
+
+### 429 Too Many Requests
+
+Returned when:
+
+- Monthly quota exceeded (XML uploads, AI searches)
+- Rate limit exceeded (separate from plan limits)
+
+API responses include:
+
+```json
+{
+  "error": "Monthly XML upload limit exceeded",
+  "limit": 500,
+  "used": 500,
+  "resetDate": "2026-04-01T00:00:00Z"
+}
+```
+
+## Frequently asked questions
+
+### Do unused limits carry over to next month?
+
+No. Monthly limits reset on the 1st of each month and unused quota does not accumulate.
+
+### Can I temporarily increase my limits?
+
+No. Limits are fixed per plan tier. To increase limits, upgrade to a higher plan.
+
+### What happens to my data if I downgrade?
+
+Your data remains intact. However:
+
+- You cannot add new resources beyond the new lower limits
+- You may need to remove profiles to get under the new profile limit
+- Feature access restrictions apply (PDF, Excel, API)
+
+### Do trial periods have full limits?
+
+Yes. During the 30-day trial, you have full access to all limits of your trial plan tier.
+
+### Are limits enforced during the trial?
+
+Yes. Even during trial periods, usage limits based on your plan tier apply.
+
+## Getting help with limits
+
+If you have questions about limits or need assistance:
+
+- **Básico plan**: Email support
+- **Pro plan**: Priority support
+- **Empresarial plan**: Contact your dedicated account manager
+- **Sales inquiries**: ventas@contafy.com for custom limit requirements
+
+## Next steps
+
+<Card title="Upgrade your plan" icon="arrow-up" href="/subscription/upgrading">
+  Learn how to upgrade for higher limits
+</Card>
+
+<Card title="Plans and pricing" icon="tag" href="/subscription/plans-pricing">
+  Compare plans and their included limits
+</Card>

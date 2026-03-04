@@ -1,0 +1,333 @@
+---
+title: Reports and analytics
+description: Generate comprehensive financial reports with cash flow, accrual metrics, and tax breakdowns
+---
+
+Contafy provides detailed financial reporting based on your CFDI data, combining cash flow analysis, accrual accounting, and tax tracking in professionally formatted reports.
+
+## Metrics API
+
+All reports are powered by the `/api/metrics` endpoint which returns comprehensive period-based metrics:
+
+```typescript
+export interface PeriodMetricsResponse {
+  period: PeriodInfo;
+  flujo: FlujoMetrics;
+  devengado: DevengadoMetrics;
+  impuestos: ImpuestosMetrics;
+  pendientes: PendientesMetrics;
+}
+```
+
+## Cash flow metrics (Flujo)
+
+Real cash movements during the period:
+
+```typescript
+export interface FlujoMetrics {
+  ingresos_cobrados: number;
+  egresos_pagados: number;
+  flujo_neto: number;
+  ingresos_cobrados_sin_conciliar?: number;
+  egresos_pagados_sin_conciliar?: number;
+}
+```
+
+### Cash flow components
+
+- **ingresos_cobrados** - Total cash collected from invoices and payment complements
+- **egresos_pagados** - Total cash paid out for expenses
+- **flujo_neto** - Net cash flow (ingresos - egresos)
+- **sin_conciliar fields** - Payment complements without linked PPD invoices/expenses
+
+<Info>
+  The "sin conciliar" (unreconciled) amounts help identify payment complements that couldn't be matched to their parent PPD documents. These are still included in the totals but flagged for review.
+</Info>
+
+## Accrual metrics (Devengado)
+
+Accounting metrics based on invoice/expense issue dates:
+
+```typescript
+export interface DevengadoMetrics {
+  ingresos_devengados: number;
+  egresos_devengados: number;
+  resultado_devengado: number;
+}
+```
+
+- **ingresos_devengados** - Total invoices issued (regardless of payment status)
+- **egresos_devengados** - Total expenses received (regardless of payment status)
+- **resultado_devengado** - Estimated profit before taxes (ingresos - egresos)
+
+These metrics follow Mexican accounting standards and are used for financial statements and tax calculations.
+
+## Tax tracking (Impuestos)
+
+Detailed tax breakdown with cash and accrual views:
+
+```typescript
+export interface ImpuestosItem {
+  cobrado?: number;    // Cash basis
+  devengado?: number;  // Accrual basis
+  pagado?: number;     // Cash basis for expenses
+}
+
+export interface ImpuestosMetrics {
+  iva_trasladado: ImpuestosItem;    // Sales VAT charged
+  iva_acreditable: ImpuestosItem;   // Input VAT (can credit)
+  retenciones_iva: ImpuestosItem;   // VAT withholdings
+  retenciones_isr: ImpuestosItem;   // Income tax withholdings
+}
+```
+
+### Tax metric categories
+
+#### IVA trasladado (Sales VAT)
+- Extracted from invoice `iva_amount` field
+- Tracked on both cash (cobrado) and accrual (devengado) basis
+- VAT you charged to customers
+
+#### IVA acreditable (Input VAT)
+- Extracted from expense `iva_amount` field
+- VAT paid to suppliers that you can credit
+- Critical for VAT return calculations
+
+#### Retenciones (Withholdings)
+- IVA and ISR withholdings from both invoices and expenses
+- Tracked separately for accurate tax filing
+- Includes `retencion_iva_amount` and `retencion_isr_amount` from CFDI
+
+<Tip>
+  The difference between `iva_trasladado.devengado` and `iva_acreditable.devengado` gives you the VAT payable/refundable for the period.
+</Tip>
+
+## Pending transactions (Pendientes)
+
+Outstanding receivables and payables:
+
+```typescript
+export interface PendientesMetrics {
+  por_cobrar: number;  // Accounts receivable
+  por_pagar: number;   // Accounts payable
+}
+```
+
+- **por_cobrar** - Unpaid or partially paid invoices
+- **por_pagar** - Unpaid or partially paid expenses
+
+Calculated by analyzing the `estadoPago` of each invoice/expense.
+
+## Monthly report template
+
+The `ReporteMensualTemplate` component generates comprehensive monthly reports:
+
+```typescript
+export interface ReporteMensualData {
+  profileName: string;
+  rfc: string;
+  mes: number;
+  año: number;
+  ingresosCobrados: number;
+  egresosPagados: number;
+  flujoNeto: number;
+  facturasPorCobrar: number;
+  facturasPorPagar: number;
+  proyeccionSaldo: number;
+  ingresosDevengados: number;
+  egresosDevengados: number;
+  utilidadOperativa: number;
+  variacionIngresos?: number;
+  variacionEgresos?: number;
+  estadoPorRegimen?: EstadoPorRegimen[];
+}
+```
+
+### Report sections
+
+#### Cash flow section
+- Visual cards showing ingresos cobrados, egresos pagados, flujo neto
+- Progress bar for operating margin percentage
+- Highlights negative cash flow with red styling
+
+#### Pending transactions section
+- Accounts receivable (por cobrar)
+- Accounts payable (por pagar)
+- Links to full invoice/expense lists
+
+#### Accrual accounting section
+- Income statement format
+- Ingresos devengados, egresos devengados, resultado devengado
+- Color-coded for positive/negative results
+
+<Note>
+  The monthly report can optionally include `estadoPorRegimen` which breaks down the income statement by tax regime when a profile has multiple regimes.
+</Note>
+
+## Report by tax regime
+
+For profiles with multiple tax regimes, reports can show per-regime breakdown:
+
+```typescript
+export interface EstadoPorRegimen {
+  nombreRegimen: string;
+  ingresos: number;
+  egresos: number;
+  retencionesIva: number;
+  retencionesIsr: number;
+  impuestoTrasladado: number;
+  utilidadNeta: number;
+}
+```
+
+This allows users to see financial performance separated by:
+- Régimen de Actividades Profesionales
+- Arrendamiento
+- Régimen de Incorporación Fiscal
+- Other SAT regimes
+
+## PDF report generation
+
+Reports are exported to PDF using jsPDF with custom templates:
+
+### Invoice report
+- Generated from `/dashboard/invoices/reporte/preview`
+- Uses `ReporteFacturasTemplate` component
+- Includes invoice list with payment status
+- Shows invoice metrics and tax breakdown
+
+### Expense report
+- Generated from `/dashboard/expenses/reporte/preview`
+- Uses `ReporteGastosTemplate` component
+- Lists expenses with categories
+- Shows expense metrics and deductibility
+
+### Monthly consolidated report
+- Generated from `/dashboard/reporte/preview`
+- Uses `ReporteMensualTemplate` component
+- Comprehensive view of all financial activity
+- Includes charts and trend analysis
+
+<Tip>
+  PDF generation happens client-side using jsPDF and jspdf-autotable. This ensures data privacy and reduces server load.
+</Tip>
+
+## Excel exports
+
+Contafy also supports Excel export for data analysis:
+
+- Transaction lists (invoices/expenses) to XLSX
+- Includes all fields from the database
+- Filterable and sortable in Excel
+- Compatible with accounting software import
+
+## Trend analysis
+
+The trend API provides time-series data:
+
+```typescript
+interface TrendDataPoint {
+  mes: number;
+  año: number;
+  ingresos_cobrados: number;
+  egresos_pagados: number;
+  ingresos_devengados: number;
+  egresos_devengados: number;
+}
+```
+
+### Trend views
+
+- **año-actual** - Current year month-by-month
+- **últimos-12-meses** - Rolling 12-month window
+- **año-completo** - Full calendar year
+- **comparar-anterior** - Current year vs previous year comparison
+
+See [Dashboard](/features/dashboard) for details on the trend chart visualization.
+
+## Report filtering
+
+All reports support comprehensive filtering:
+
+### Filter dimensions
+
+- **Profile** - Specific business or all businesses
+- **Time period** - Month and year selection
+- **Tax regime** - Filter by specific regime (when profile has multiple)
+
+### Aggregate reports
+
+When "Todas las empresas" is selected:
+- Metrics sum across all profiles
+- Profile column added to transaction lists
+- Separate subtotals per profile
+- Combined tax calculations
+
+<Warning>
+  When generating aggregate reports, ensure tax regimes are compatible. Mixing different entity types (Física vs Moral) may produce reports that need separate review.
+</Warning>
+
+## Export dashboard metrics
+
+The dashboard includes an "Export PDF" button that generates a snapshot report:
+
+```typescript
+const ExportPDFButton: React.FC<{
+  profileId?: string;
+  mes: number;
+  año: number;
+}> = ({ profileId, mes, año }) => {
+  // Generates PDF with current dashboard state
+};
+```
+
+The exported PDF includes:
+- All metric cards
+- Trend chart as image
+- Recent transactions tables
+- Period information and filters applied
+
+## Related features
+
+<CardGroup cols={2}>
+  <Card title="Dashboard" icon="gauge" href="/features/dashboard">
+    View real-time metrics and charts
+  </Card>
+  <Card title="Invoice Management" icon="file-text" href="/features/invoice-management">
+    Data source for invoice reports
+  </Card>
+  <Card title="Expense Tracking" icon="receipt" href="/features/expense-tracking">
+    Data source for expense reports
+  </Card>
+  <Card title="Multi-Profile" icon="building" href="/features/multi-profile">
+    Generate per-profile or aggregate reports
+  </Card>
+</CardGroup>
+
+## Metrics calculation notes
+
+### Cash vs Accrual
+
+- **Cash basis** (flujo) uses payment date from complementos de pago
+- **Accrual basis** (devengado) uses invoice/expense issue date (fecha)
+- Both views are essential for complete financial picture
+
+### Period boundaries
+
+- Metrics are calculated per calendar month
+- Transactions assigned to month based on relevant date (issue or payment)
+- Period IDs are UUIDs that map to specific profile + month + year
+
+### Default values
+
+If no period exists or user has no subscription:
+
+```typescript
+export const DEFAULT_PERIOD_METRICS: PeriodMetricsResponse = {
+  period: { id: '', start: '', end: '' },
+  flujo: { ingresos_cobrados: 0, egresos_pagados: 0, flujo_neto: 0 },
+  devengado: { ingresos_devengados: 0, egresos_devengados: 0, resultado_devengado: 0 },
+  impuestos: { iva_trasladado: {}, iva_acreditable: {}, retenciones_iva: {}, retenciones_isr: {} },
+  pendientes: { por_cobrar: 0, por_pagar: 0 },
+};
+```

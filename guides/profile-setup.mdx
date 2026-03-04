@@ -1,0 +1,305 @@
+---
+title: Profile setup
+description: Create and configure RFC profiles to manage multiple businesses in Contafy
+---
+
+Profiles in Contafy represent individual tax entities (RFCs) that you manage. Each profile can track invoices, expenses, and reports separately.
+
+## Understanding profiles
+
+A **profile** in Contafy represents a Mexican tax entity with:
+
+- **RFC** (Registro Federal de Contribuyentes): The unique tax ID
+- **Nombre or Razón Social**: Business or individual name
+- **Tipo de Persona**: Persona Física (individual) or Persona Moral (corporation)
+- **Regímenes Fiscales**: Tax regimes applicable to this RFC
+- **Validation settings**: Rules for invoice and expense validation
+
+### Profile limits by plan
+
+Your subscription plan determines how many profiles you can create:
+
+- **FREE**: 1 profile
+- **STARTER**: 3 profiles
+- **PROFESSIONAL**: 10 profiles
+- **ENTERPRISE**: Unlimited profiles
+
+<Note>
+  The system will display your remaining profile limit when creating new profiles. Frozen profiles still count toward your limit.
+</Note>
+
+## Creating your first profile
+
+When you first log in, you'll be prompted to create your initial RFC profile.
+
+<Steps>
+  <Step title="Navigate to profile setup">
+    After logging in, you'll be automatically redirected to `/dashboard/setup` if you don't have any profiles yet.
+  </Step>
+
+  <Step title="Select the tipo de persona">
+    Choose the entity type:
+    
+    - **Persona Física**: For individuals, freelancers, or sole proprietors
+    - **Persona Moral**: For corporations, LLCs, or other business entities
+    
+    Click on the appropriate card to select it.
+  </Step>
+
+  <Step title="Enter the nombre or razón social">
+    Provide the full legal name:
+    
+    - For Persona Física: Your full name (e.g., "Juan Pérez García")
+    - For Persona Moral: The legal business name (e.g., "Empresa S.A. de C.V.")
+    
+    This name will appear on reports and throughout the platform.
+  </Step>
+
+  <Step title="Enter the RFC">
+    Input your 12 or 13-character RFC (tax ID):
+    
+    - The format is automatically validated
+    - Letters are automatically converted to uppercase
+    - Include the homoclave (verification digits)
+    
+    Example: `ABCD123456XYZ`
+    
+    <Tip>
+      Don't know your RFC? Click "¿No sabes tu RFC?" to visit the SAT website where you can look it up using your CURP.
+    </Tip>
+  </Step>
+
+  <Step title="Click 'Crear perfil'">
+    Submit the form to create your profile. You'll be redirected to the dashboard where you can start uploading invoices.
+  </Step>
+</Steps>
+
+<Warning>
+  Ensure your RFC is correct before creating the profile. While you can edit profiles later, changing the RFC may affect historical data and validations.
+</Warning>
+
+## Adding additional profiles
+
+If you manage multiple businesses or RFCs, you can create additional profiles.
+
+<Steps>
+  <Step title="Go to the setup page">
+    Click your user menu in the top right and select "Configuración" or navigate to `/dashboard/setup`.
+  </Step>
+
+  <Step title="Navigate to the Profiles tab">
+    Click on the "Perfiles" tab to view your existing profiles.
+  </Step>
+
+  <Step title="Click 'Agregar perfil'">
+    If you haven't reached your plan limit, click the "Agregar perfil" button.
+  </Step>
+
+  <Step title="Fill out the profile form">
+    Follow the same steps as creating your first profile: select tipo de persona, enter nombre, and provide the RFC.
+  </Step>
+
+  <Step title="Submit the form">
+    Click "Crear perfil" to add the new RFC profile to your account.
+  </Step>
+</Steps>
+
+<Note>
+  If you've reached your profile limit, you'll see an alert with an option to upgrade your plan. Click "Actualizar a [PLAN]" to increase your limit.
+</Note>
+
+## Configuring profile settings
+
+After creating a profile, you can configure advanced settings.
+
+### Regímenes fiscales
+
+Add the tax regimes that apply to this RFC:
+
+<Steps>
+  <Step title="Open profile settings">
+    From the Profiles tab, click the "Editar" button on the profile you want to configure.
+  </Step>
+
+  <Step title="Scroll to 'Regímenes fiscales'">
+    This section lists all available SAT tax regimes.
+  </Step>
+
+  <Step title="Select applicable regimes">
+    Check the boxes for each tax regime that applies to this RFC. Common regimes include:
+    
+    - **601**: General de Ley Personas Morales
+    - **612**: Personas Físicas con Actividades Empresariales
+    - **605**: Sueldos y Salarios e Ingresos Asimilados a Salarios
+    - **626**: Régimen Simplificado de Confianza
+  </Step>
+
+  <Step title="Save changes">
+    Click "Guardar" to update the profile's tax regimes.
+  </Step>
+</Steps>
+
+<Tip>
+  Configuring tax regimes enables automatic validation of invoices. The system will warn you if an invoice doesn't match the expected régimen fiscal.
+</Tip>
+
+### Validation settings
+
+Customize how strictly Contafy validates invoices and expenses for this profile:
+
+| Setting | Description | Default |
+|---------|-------------|--------|
+| **Validar RFC Ingresos** | Check that invoice receptor RFC matches this profile's RFC | Enabled |
+| **Validar RFC Gastos** | Check that expense emisor RFC matches this profile's RFC | Enabled |
+| **Validar Régimen Fiscal** | Verify invoice régimen matches profile's configured regimes | Enabled |
+| **Validar UUID Duplicado** | Reject invoices with duplicate UUIDs | Enabled |
+| **Bloquear si RFC no coincide** | Block upload if RFC doesn't match | Disabled |
+| **Bloquear si régimen no coincide** | Block upload if régimen is invalid | Disabled |
+
+<Steps>
+  <Step title="Open validation settings">
+    In the profile edit form, scroll to "Validaciones habilitadas".
+  </Step>
+
+  <Step title="Toggle validation rules">
+    Use the switches to enable or disable each validation rule based on your needs.
+  </Step>
+
+  <Step title="Save changes">
+    Click "Guardar" to apply the new validation settings.
+  </Step>
+</Steps>
+
+<Warning>
+  Disabling validations can allow incorrect or invalid data into your system. Only disable validations if you understand the implications.
+</Warning>
+
+## Managing profiles
+
+### Viewing profile list
+
+All your profiles are visible in the setup page under the "Perfiles" tab. Each profile card shows:
+
+- Profile name and RFC
+- Tipo de persona (Física/Moral)
+- Creation date
+- Status (Active/Frozen)
+- Quick actions (Edit/Delete)
+
+### Editing a profile
+
+<Steps>
+  <Step title="Go to the Profiles tab">
+    Navigate to `/dashboard/setup` and click "Perfiles".
+  </Step>
+
+  <Step title="Click 'Editar' on the profile">
+    Find the profile you want to modify and click the "Editar" button.
+  </Step>
+
+  <Step title="Update the fields">
+    You can change:
+    - Nombre/Razón Social
+    - RFC (with caution)
+    - Regímenes fiscales
+    - Validation settings
+  </Step>
+
+  <Step title="Save changes">
+    Click "Guardar" to apply your updates.
+  </Step>
+</Steps>
+
+### Deleting a profile
+
+<Warning>
+  Deleting a profile is permanent and will remove all associated invoices, expenses, and reports. This action cannot be undone.
+</Warning>
+
+<Steps>
+  <Step title="Open the profile list">
+    Go to `/dashboard/setup` → "Perfiles" tab.
+  </Step>
+
+  <Step title="Click 'Eliminar' on the profile">
+    Find the profile you want to remove and click the "Eliminar" button.
+  </Step>
+
+  <Step title="Confirm deletion">
+    Type "ELIMINAR" in the confirmation dialog to verify you want to delete the profile and all its data.
+  </Step>
+
+  <Step title="Submit confirmation">
+    Click "Eliminar" to permanently delete the profile.
+  </Step>
+</Steps>
+
+## Frozen profiles
+
+Profiles can be frozen when:
+
+- You've exceeded your plan's profile limit
+- There's a payment issue with your subscription
+- Manual suspension by administrators
+
+### What happens when a profile is frozen?
+
+- You **cannot** upload new invoices or expenses
+- You **can** view existing data and reports
+- You **can** export historical data
+- The profile counts toward your plan limit
+
+### Unfreezing a profile
+
+To unfreeze a profile:
+
+1. Resolve the underlying issue (upgrade plan, update payment method, etc.)
+2. Contact support if the profile remains frozen after resolving the issue
+3. The system will automatically unfreeze profiles when conditions are met
+
+<Note>
+  Profiles frozen due to plan limits will automatically unfreeze when you upgrade to a higher plan.
+</Note>
+
+## Switching between profiles
+
+When viewing invoices, expenses, or reports, you can filter by profile:
+
+1. Look for the profile selector dropdown in the page header
+2. Select a specific profile or choose "Todos" to view all profiles
+3. The page will refresh to show data for the selected profile
+
+<Tip>
+  Contafy remembers your last selected profile. When you return to the invoices or expenses page, you'll see the same profile you were viewing before.
+</Tip>
+
+## Troubleshooting
+
+### "RFC inválido"
+
+The RFC format is incorrect. Ensure you:
+- Include all 12 or 13 characters
+- Use only uppercase letters and numbers
+- Include the homoclave
+- Follow the pattern: `[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}`
+
+### "Límite de perfiles alcanzado"
+
+You've reached your plan's profile limit. To create more profiles:
+1. Delete unused profiles, or
+2. Upgrade to a higher plan with more profile slots
+
+### "Este RFC ya existe"
+
+You already have a profile with this RFC. Each RFC can only have one profile per user account.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Upload invoices" icon="file-invoice" href="/guides/uploading-invoices">
+    Start uploading CFDI XML files to your profile
+  </Card>
+  <Card title="Manage expenses" icon="receipt" href="/guides/managing-expenses">
+    Track business expenses and validate CFDIs
+  </Card>
+</CardGroup>

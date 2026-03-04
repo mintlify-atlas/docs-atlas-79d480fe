@@ -1,0 +1,291 @@
+---
+title: Installation
+description: Self-hosting setup instructions for Contafy
+---
+
+## Self-hosting Contafy
+
+This guide will help you set up Contafy on your own infrastructure. Contafy is a Next.js application that can be deployed to any platform supporting Node.js.
+
+<Note>
+Contafy requires a backend API to function. Ensure you have access to the Contafy API endpoint before proceeding with the frontend installation.
+</Note>
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js**: Version 20 or higher ([Download Node.js](https://nodejs.org/))
+- **pnpm**: Version 8 or higher (required package manager)
+
+### Installing pnpm
+
+If you don't have pnpm installed, install it globally:
+
+```bash
+npm install -g pnpm
+```
+
+## Installation steps
+
+<Steps>
+
+<Step title="Clone the repository">
+
+Clone the Contafy repository to your local machine:
+
+```bash
+git clone https://github.com/your-username/contafy.git
+cd contafy
+```
+
+</Step>
+
+<Step title="Install dependencies">
+
+Install all required dependencies using pnpm:
+
+```bash
+pnpm install
+```
+
+This will install all dependencies defined in `package.json`, including:
+- Next.js 16 with React 19
+- Tailwind CSS 4
+- Shadcn/ui and Radix UI components
+- TanStack Query for data fetching
+- Recharts for visualizations
+- And more...
+
+</Step>
+
+<Step title="Configure environment variables">
+
+Create a `.env.local` file in the root directory of the project:
+
+```bash .env.local
+# API Backend
+NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# Frontend URLs
+NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
+
+# Admin Route (Optional)
+# If not configured, defaults to: internal/discount-management
+ADMIN_DISCOUNT_ROUTE=internal/discount-management
+```
+
+### Environment variables explained
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_API_URL` | Backend API endpoint URL | Yes |
+| `NEXT_PUBLIC_FRONTEND_URL` | Frontend application URL | Yes |
+| `ADMIN_DISCOUNT_ROUTE` | Custom admin discount management route | No |
+
+<Warning>
+The `NEXT_PUBLIC_API_URL` must point to a running instance of the Contafy backend API. The frontend cannot function without a properly configured backend.
+</Warning>
+
+</Step>
+
+<Step title="Run the development server">
+
+Start the Next.js development server:
+
+```bash
+pnpm dev
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000)
+
+You should see the Contafy landing page. Navigate to `/auth/register` to create your first account.
+
+<Note>
+The development server includes hot module replacement (HMR), so changes to your code will be reflected immediately without restarting the server.
+</Note>
+
+</Step>
+
+</Steps>
+
+## Building for production
+
+When you're ready to deploy Contafy to production:
+
+### Build the application
+
+```bash
+pnpm build
+```
+
+This command:
+1. Compiles TypeScript code
+2. Optimizes and bundles all assets
+3. Generates static pages where possible
+4. Creates an optimized production build in the `.next` directory
+
+### Start the production server
+
+```bash
+pnpm start
+```
+
+The production server will start on port 3000 by default.
+
+<Note>
+For production deployments, ensure all environment variables are properly configured for your production environment.
+</Note>
+
+## Available scripts
+
+Contafy includes several npm scripts for development and maintenance:
+
+```bash
+# Development
+pnpm dev          # Start development server
+pnpm dev:webpack  # Start development server with webpack (for debugging)
+
+# Production
+pnpm build        # Build for production
+pnpm start        # Start production server
+
+# Code quality
+pnpm lint         # Run ESLint
+pnpm typecheck    # Run TypeScript type checking
+pnpm verify:all   # Run lint, typecheck, and build
+pnpm verify:ci    # Run lint and typecheck (for CI/CD)
+```
+
+## Deployment options
+
+Contafy can be deployed to various platforms:
+
+### Vercel (Recommended)
+
+The easiest deployment option for Next.js applications:
+
+1. Connect your GitHub repository to [Vercel](https://vercel.com)
+2. Configure environment variables in the Vercel dashboard
+3. Vercel will automatically detect Next.js and deploy your application
+
+<Note>
+Vercel provides automatic SSL, global CDN, and seamless integration with Next.js features.
+</Note>
+
+### Other platforms
+
+Contafy can also be deployed to:
+
+- **Netlify**: Supports Next.js with serverless functions
+- **Railway**: Simple deployment with automatic HTTPS
+- **DigitalOcean**: Deploy to droplets or App Platform
+- **AWS Amplify**: Full AWS integration
+- **Docker**: Containerize with Next.js standalone output
+
+### Docker deployment
+
+For containerized deployments:
+
+```dockerfile
+FROM node:20-alpine AS base
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN pnpm build
+
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV production
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+## Project structure
+
+Understanding the Contafy codebase:
+
+```
+contafy/
+├── app/                    # Next.js App Router pages and routes
+│   ├── auth/              # Authentication pages (login, register, verify)
+│   ├── dashboard/         # Main dashboard and features
+│   │   ├── invoices/      # Invoice management
+│   │   ├── expenses/      # Expense tracking
+│   │   ├── setup/         # Profile and account configuration
+│   │   ├── reporte/       # Report generation
+│   │   └── sat-search/    # SAT database search
+│   ├── subscription/      # Subscription management
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Landing page
+├── components/            # Reusable React components
+│   ├── common/           # Common components
+│   ├── layout/           # Layout components
+│   ├── auth/             # Authentication components
+│   └── ui/               # Shadcn/ui components
+├── lib/                  # Utilities and business logic
+│   ├── api/              # API client and endpoint functions
+│   ├── types/            # TypeScript type definitions
+│   └── utils.ts          # General utilities
+├── public/               # Static assets
+├── .env.local            # Environment variables (create this)
+├── package.json          # Dependencies and scripts
+├── next.config.js        # Next.js configuration
+├── tailwind.config.ts    # Tailwind CSS configuration
+└── tsconfig.json         # TypeScript configuration
+```
+
+## Troubleshooting
+
+### Port already in use
+
+If port 3000 is already in use, specify a different port:
+
+```bash
+PORT=3001 pnpm dev
+```
+
+### API connection errors
+
+If you see API connection errors:
+
+1. Verify `NEXT_PUBLIC_API_URL` is correctly set in `.env.local`
+2. Ensure the backend API is running and accessible
+3. Check for CORS configuration on the backend
+4. Verify network connectivity between frontend and backend
+
+### Build errors
+
+If the build fails:
+
+1. Run type checking: `pnpm typecheck`
+2. Clear the Next.js cache: `rm -rf .next`
+3. Delete node_modules and reinstall: `rm -rf node_modules && pnpm install`
+4. Check for TypeScript errors in your IDE
+
+## Next steps
+
+Now that Contafy is installed:
+
+- Follow the [quickstart guide](/quickstart) to set up your first account and profile
+- Review the project structure to understand the codebase organization
+- Configure additional features like Firebase (if needed)
+- Set up a production deployment on your preferred platform
+
+<Warning>
+Remember to keep your environment variables secure and never commit `.env.local` to version control.
+</Warning>

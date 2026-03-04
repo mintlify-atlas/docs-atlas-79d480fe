@@ -1,0 +1,435 @@
+---
+title: Managing expenses
+description: Learn how to upload, validate, and track CFDI expense XML files in Contafy
+---
+
+Contafy helps you manage business expenses by uploading CFDI XML files where you are the receptor (buyer). Track deductible expenses, validate against SAT requirements, and generate expense reports.
+
+## Understanding CFDI expenses
+
+Expenses (gastos) in Contafy represent purchases where:
+
+- **You are the receptor** (receiver) of the CFDI
+- **Your RFC** appears as the receptor in the XML
+- The expense represents a deductible business cost
+
+### Expense categories
+
+Contafy supports expense categorization for better organization:
+
+- **Viáticos**: Travel and per diem expenses
+- **Oficina**: Office supplies and equipment
+- **Servicios**: Professional services and subscriptions
+- **Transporte**: Transportation and fuel
+- **Alimentación**: Meals and entertainment
+
+<Note>
+  Categories are for internal organization only. They don't affect tax deductions or SAT compliance.
+</Note>
+
+## Uploading expense files
+
+The expense upload process is similar to invoice uploads but specifically for XML files where you are the receptor.
+
+### Using the expense upload page
+
+<Steps>
+  <Step title="Navigate to expense upload">
+    Go to **Gastos** → **Carga de Gastos XML** in the sidebar or visit `/dashboard/expenses/upload`.
+  </Step>
+
+  <Step title="Check your usage limit">
+    At the top of the page, you'll see your monthly expense usage:
+    
+    ```
+    25 / 100 gastos utilizados (25%)
+    Te quedan 75 gastos disponibles este mes.
+    ```
+    
+    Ensure you have available slots before uploading.
+  </Step>
+
+  <Step title="Drag and drop XML files">
+    The upload zone accepts XML files:
+    
+    - **Drag and drop** multiple expense XML files
+    - **Click the zone** to browse for files
+    
+    Only `.xml` files are accepted. The system validates the extension before queueing.
+  </Step>
+
+  <Step title="Review the files queue">
+    Each file appears in the queue with:
+    
+    - File name and size
+    - Validation status (Valid/Error)
+    - Type detection (XML)
+    - Error messages for invalid files
+    
+    Remove incorrect files with the trash icon or "Limpiar todo" to clear all.
+  </Step>
+
+  <Step title="Click 'Procesar archivos'">
+    Once you have valid files queued, click "Procesar archivos" to continue.
+  </Step>
+
+  <Step title="Select the profile">
+    A dialog prompts you to select the RFC profile (empresa) for these expenses:
+    
+    - Choose the profile matching the receptor RFC in the XML files
+    - The dialog shows how many files will be processed
+    - Frozen profiles are disabled and show a warning
+  </Step>
+
+  <Step title="Confirm and process">
+    Review the summary and click "Confirmar y procesar". Each file is uploaded and validated individually.
+  </Step>
+
+  <Step title="Monitor results">
+    The status updates in real-time:
+    
+    - **Uploading**: Sending file to server
+    - **Success**: Expense validated and saved
+    - **Error**: Validation failed (error message displayed)
+    
+    After processing, a summary dialog shows successful and failed uploads.
+  </Step>
+</Steps>
+
+<Tip>
+  Upload multiple files at once for bulk processing. The system handles them sequentially and provides individual results.
+</Tip>
+
+## Expense validation
+
+Expenses are validated against SAT requirements and your profile settings.
+
+### Server-side validation checks
+
+- **XML structure**: Valid CFDI format (3.3 or 4.0)
+- **Receptor RFC matching**: Receptor RFC must match selected profile
+- **SAT validation**: UUID verification and digital seal
+- **Régimen fiscal**: Matches profile's configured regimes
+- **Duplicate detection**: Checks for existing UUID
+
+### Validation error handling
+
+If validation fails:
+
+1. The file status changes to "Error"
+2. An error message explains the issue
+3. The file remains in the queue for review
+4. You can remove it and re-upload after fixing
+
+#### Common expense validation errors
+
+**RFC receptor no coincide**
+
+- The receptor RFC in the XML doesn't match your profile
+- Verify you selected the correct profile
+- Ensure the expense is actually for this business
+
+**UUID ya existe**
+
+- This expense was already uploaded
+- Check the expenses list to confirm
+- Avoid uploading the same file twice
+
+**Régimen fiscal no válido**
+
+- The expense's régimen doesn't match your profile configuration
+- Update your profile's regímenes fiscales if needed
+- Verify the XML is correct
+
+<Warning>
+  Only valid expenses can be used for tax deductions. Always resolve validation errors before filing taxes.
+</Warning>
+
+## Manual expense entries
+
+For expenses without a CFDI (e.g., cash purchases below the CFDI threshold), create manual entries.
+
+### When to use manual expenses
+
+- Purchases below the CFDI requirement threshold
+- Simplified regime expenses
+- Small cash transactions
+- Foreign expenses without Mexican CFDI
+
+<Note>
+  Manual expenses don't have UUIDs or digital seals. Consult your accountant about deductibility.
+</Note>
+
+### Creating a manual expense
+
+<Steps>
+  <Step title="Open the manual expense dialog">
+    From the expenses list page, click "Gasto manual" in the header.
+  </Step>
+
+  <Step title="Fill out the expense form">
+    Provide the required information:
+    
+    **Basic information:**
+    - **Concepto**: Description (e.g., "Papelería oficina")
+    - **Subtotal (MXN)**: Amount before tax
+    - **IVA (MXN)**: VAT amount (if applicable)
+    - **Fecha**: Expense date
+    
+    **Optional details:**
+    - **Categoría**: Select from Viáticos, Oficina, Servicios, Transporte, or Alimentación
+    - **Notas**: Additional notes or vendor information
+  </Step>
+
+  <Step title="Create the expense">
+    Click "Crear gasto" to add the manual expense to your records.
+  </Step>
+</Steps>
+
+### Editing manual expenses
+
+Manual expenses (but not XML-based expenses) can be edited:
+
+<Steps>
+  <Step title="Find the manual expense">
+    In the expenses list, manual expenses show an "Manual" badge in the ORIGEN column.
+  </Step>
+
+  <Step title="Click the edit icon">
+    Click the pencil icon in the ACCIONES column.
+  </Step>
+
+  <Step title="Update the fields">
+    Modify:
+    - Concepto
+    - Subtotal
+    - IVA
+    - Categoría
+    - Notas
+    
+    You cannot change the fecha (date) after creation.
+  </Step>
+
+  <Step title="Save changes">
+    Click "Actualizar" to save your modifications.
+  </Step>
+</Steps>
+
+### Deleting manual expenses
+
+<Steps>
+  <Step title="Click delete on the expense">
+    In the expenses list, click the trash icon for the manual expense.
+  </Step>
+
+  <Step title="Confirm deletion">
+    Type "ELIMINAR" in the confirmation dialog.
+  </Step>
+
+  <Step title="Submit">
+    Click "Eliminar" to permanently remove the manual expense.
+  </Step>
+</Steps>
+
+## Expense list and filtering
+
+### Viewing expenses
+
+The expenses page (`/dashboard/expenses`) displays all uploaded expenses in a table.
+
+#### Table columns
+
+- **UUID / FOLIO**: Invoice unique identifier (or "Manual" for manual entries)
+- **FECHA**: Expense date
+- **EMISOR**: Vendor/supplier name and RFC
+- **RECEPTOR**: Your business name and RFC
+- **MONTO**: Subtotal amount
+- **IVA TRASL.**: IVA charged to you
+- **CATEGORÍA**: Expense category badge
+- **ORIGEN**: XML or Manual badge
+- **ESTADO**: Validation status
+- **ACCIONES**: Edit/Delete buttons
+
+### Filtering expenses
+
+Use the header filters to narrow down results:
+
+#### Profile selector
+
+- Select a specific RFC profile
+- Choose "Todos" to view expenses across all profiles
+
+#### Period filters
+
+- **Mes**: Month (Enero - Diciembre)
+- **Año**: Year (current ± 2 years)
+
+#### Régimen fiscal filter
+
+Filter by tax regime if your profile has multiple regimes configured.
+
+#### Search field
+
+Search by:
+- UUID
+- Vendor name (emisor)
+- Vendor RFC
+- Expense concept
+- Manual expense notes
+
+The search uses a 500ms debounce to avoid excessive queries.
+
+### Category filter
+
+Filter expenses by category using the category dropdown:
+- Viáticos (purple badge)
+- Oficina (blue badge)
+- Servicios (yellow badge)
+- Transporte (cyan badge)
+- Alimentación (orange badge)
+
+<Tip>
+  Combine multiple filters to find specific expenses. For example, filter by "Oficina" category + "Diciembre" to see all office expenses from December.
+</Tip>
+
+## Deleting expenses
+
+<Warning>
+  Deleting expenses (XML or manual) is permanent and cannot be undone. Export your data first if needed.
+</Warning>
+
+<Steps>
+  <Step title="Locate the expense">
+    Find the expense to delete in the expenses table.
+  </Step>
+
+  <Step title="Click the delete icon">
+    Click the trash icon in the ACCIONES column.
+  </Step>
+
+  <Step title="Review expense details">
+    The dialog shows:
+    - Vendor name
+    - Concept
+    - Total amount
+    - UUID (if applicable)
+  </Step>
+
+  <Step title="Type 'ELIMINAR'">
+    Enter `ELIMINAR` (all caps) in the confirmation field.
+  </Step>
+
+  <Step title="Confirm deletion">
+    Click "Eliminar" to permanently delete the expense.
+  </Step>
+</Steps>
+
+## Expense metrics and summary
+
+The expenses page shows summary cards at the top:
+
+### Total expenses
+
+Displays the sum of all expense subtotals for the selected period and profile.
+
+### Expense count
+
+Shows the number of expenses (XML + manual) in the current view.
+
+### Category breakdown
+
+A visual breakdown of expenses by category (if categories are assigned).
+
+<Note>
+  Metrics update automatically when you change filters. They reflect only the currently filtered expenses.
+</Note>
+
+## Usage limits
+
+Expense uploads are subject to monthly limits based on your plan:
+
+| Plan | Monthly Expense Limit |
+|------|----------------------|
+| FREE | 30 expenses/month |
+| STARTER | 100 expenses/month |
+| PROFESSIONAL | 500 expenses/month |
+| ENTERPRISE | Unlimited |
+
+### Usage tracking
+
+The upload page displays your current usage with a progress bar:
+
+- **0-74%**: Green (normal)
+- **75-89%**: Blue (approaching limit)
+- **90-99%**: Orange (near limit)
+- **100%**: Red (limit reached)
+
+When you reach the limit:
+- You cannot upload more expenses until next month
+- An alert suggests upgrading your plan
+- Existing expenses remain accessible
+
+<Tip>
+  Manual expense entries do **not** count toward your monthly limit. Use them for small or cash purchases to conserve your XML upload quota.
+</Tip>
+
+## Best practices
+
+### Organize by category
+
+- Assign categories to manual expenses immediately
+- Use consistent category names
+- Categories help with expense reports and tax preparation
+
+### Regular uploads
+
+- Upload expenses weekly or monthly
+- Don't wait until the end of the fiscal year
+- Regular uploads help track cash flow
+
+### Validate immediately
+
+- Review validation errors as soon as they occur
+- Contact vendors if CFDIs are invalid
+- Don't accumulate invalid expenses
+
+### Keep backups
+
+- Export expense reports regularly
+- Download XML files to a secure location
+- Maintain copies outside Contafy
+
+## Troubleshooting
+
+### "Límite de gastos alcanzado"
+
+You've used all expense slots for the month. Options:
+1. Wait until next month (resets on the 1st)
+2. Upgrade to a plan with higher limits
+3. Use manual expense entries (don't count toward limit)
+
+### "Perfil congelado"
+
+The selected profile is frozen and cannot accept new expenses. Resolve by:
+1. Upgrading your plan (if frozen due to limit)
+2. Updating payment method (if payment issue)
+3. Contacting support
+
+### "No se encontraron gastos"
+
+No expenses match your current filters. Try:
+1. Clearing all filters
+2. Selecting "Todos" for profile
+3. Expanding the date range
+4. Checking if you've uploaded any expenses
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="View reports" icon="chart-bar" href="/guides/viewing-reports">
+    Generate expense reports and financial analytics
+  </Card>
+  <Card title="Export data" icon="file-export" href="/guides/exporting-data">
+    Export expenses to PDF and Excel formats
+  </Card>
+</CardGroup>

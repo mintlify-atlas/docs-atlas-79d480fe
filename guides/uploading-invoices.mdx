@@ -1,0 +1,391 @@
+---
+title: Uploading invoices
+description: Learn how to upload, validate, and manage CFDI invoice XML files in Contafy
+---
+
+Contafy allows you to upload Mexican CFDI (Comprobante Fiscal Digital por Internet) invoices in XML format for validation, tracking, and reporting.
+
+## Understanding CFDI invoices
+
+CFDI invoices in Contafy represent income (facturas emitidas) where:
+
+- **You are the emisor** (issuer) of the invoice
+- **Your RFC** appears as the emisor in the XML
+- The invoice represents income for your business
+
+### Supported CFDI types
+
+Contafy supports multiple CFDI invoice types:
+
+- **PUE** (Pago en Una Sola Exhibición): Single payment invoices
+- **PPD** (Pago en Parcialidades o Diferido): Invoices with deferred or partial payments
+- **COMPLEMENTO_PAGO**: Payment complement documents (REP)
+
+<Note>
+  CFDI 3.3 and CFDI 4.0 versions are both supported. The platform automatically detects the version.
+</Note>
+
+## Uploading invoice files
+
+There are two ways to upload invoices: through the upload page or bulk upload.
+
+### Using the upload page
+
+<Steps>
+  <Step title="Navigate to invoice upload">
+    Go to **Ingresos** → **Subir Facturas** in the sidebar or click the "Subir Facturas" button from the invoices list page.
+  </Step>
+
+  <Step title="Drag and drop XML files">
+    The upload zone accepts XML files. You can:
+    
+    - **Drag and drop** one or multiple XML files into the upload zone
+    - **Click "Seleccionar archivos"** to browse your computer for files
+    
+    Only `.xml` files are accepted. Other file types will be rejected.
+  </Step>
+
+  <Step title="Review the file queue">
+    After selecting files, they appear in the queue below the upload zone. Each file shows:
+    
+    - File name
+    - File size
+    - Validation status (Valid/Error)
+    - Error message (if invalid)
+    
+    You can remove individual files by clicking the trash icon or clear all files with "Limpiar todo".
+  </Step>
+
+  <Step title="Select the profile">
+    When you click "Procesar archivos", a dialog appears asking you to select the RFC profile for these invoices.
+    
+    Choose the correct profile that matches the emisor RFC in the invoices.
+  </Step>
+
+  <Step title="Confirm and process">
+    Review the summary:
+    
+    - Number of valid files to be processed
+    - Selected profile name and RFC
+    
+    Click "Confirmar y procesar" to upload the invoices.
+  </Step>
+
+  <Step title="Monitor upload progress">
+    Each file is processed individually. The status updates in real-time:
+    
+    - **Uploading**: File is being sent to the server
+    - **Success**: Invoice validated and stored successfully
+    - **Error**: Validation failed (see error message)
+  </Step>
+</Steps>
+
+<Tip>
+  You can upload multiple files at once. The system processes them sequentially and provides individual results for each file.
+</Tip>
+
+### File validation
+
+Before upload, files are validated locally:
+
+- **Extension check**: Must be `.xml`
+- **File size**: Reasonable size for XML documents
+
+After upload, server-side validation checks:
+
+- **XML structure**: Valid CFDI format
+- **SAT validation**: UUID, digital seal, and certificate verification
+- **RFC matching**: Emisor RFC matches selected profile (if enabled)
+- **Régimen fiscal**: Matches profile's configured regimes (if enabled)
+- **Duplicate UUID**: Checks if invoice already exists
+
+## Invoice validation results
+
+Each uploaded invoice is validated against SAT rules and your profile settings.
+
+### Validation status indicators
+
+In the invoices list, each invoice shows a status badge:
+
+| Status | Meaning | Description |
+|--------|---------|-------------|
+| **✓ VÁLIDO** | Valid | Invoice passed all validations |
+| **ERROR** | Invalid | Validation failed (see details) |
+| **✓ Pagado** | Paid | Invoice is paid (PUE or PPD with full payment) |
+| **No Pagado** | Unpaid | PPD invoice with no payment registered |
+| **Pago Parcial (X%)** | Partially paid | PPD invoice with partial payment |
+
+### Common validation errors
+
+#### RFC no coincide
+
+**Cause**: The emisor RFC in the XML doesn't match your selected profile's RFC.
+
+**Solution**:
+1. Verify you selected the correct profile
+2. Check if the XML file corresponds to the right business
+3. If the RFC is genuinely incorrect, the invoice may not belong to this profile
+
+#### UUID duplicado
+
+**Cause**: An invoice with this UUID already exists in your account.
+
+**Solution**:
+1. Check the existing invoices list to see if this invoice was previously uploaded
+2. If it's a different invoice with the same UUID, contact SAT as this indicates a serious issue
+3. Remove the duplicate file from your queue
+
+#### Régimen fiscal no válido
+
+**Cause**: The invoice's régimen fiscal doesn't match your profile's configured tax regimes.
+
+**Solution**:
+1. Go to profile settings and verify the configured regímenes fiscales
+2. Add the missing régimen if it's legitimate for your business
+3. If the régimen is incorrect in the XML, contact your accountant
+
+#### Sello digital inválido
+
+**Cause**: The digital seal (sello) couldn't be verified with SAT.
+
+**Solution**:
+1. Verify the XML file isn't corrupted
+2. Request a new CFDI from the PAC (Proveedor Autorizado de Certificación)
+3. Contact SAT if the issue persists
+
+<Warning>
+  Invoices with invalid seals cannot be used for tax deductions. Always resolve validation errors before filing taxes.
+</Warning>
+
+## Managing payment status (PPD invoices)
+
+For PPD (Pago en Parcialidades o Diferido) invoices, you need to track payments separately.
+
+### Understanding PPD payment flow
+
+1. **Initial invoice**: Upload the PPD invoice (shows as "No Pagado")
+2. **Payment complement**: Upload REP (Recepción de Pagos) XML files
+3. **Status update**: System automatically links REP to the original invoice
+4. **Payment tracking**: View payment percentage and history
+
+### Uploading payment complements
+
+<Steps>
+  <Step title="Generate REP from your PAC">
+    When you receive a payment, generate a payment complement (REP) through your PAC provider.
+  </Step>
+
+  <Step title="Upload the REP XML">
+    Use the same upload process to upload the REP XML file. The system automatically:
+    
+    - Detects it's a payment complement (tipo: COMPLEMENTO_PAGO)
+    - Links it to the corresponding PPD invoice using the UUID
+    - Updates the payment status and percentage
+  </Step>
+
+  <Step title="Verify payment linkage">
+    In the invoices list, the original PPD invoice now shows:
+    
+    - Updated payment status (Pago Parcial or Pagado)
+    - Payment percentage
+    - Total amount paid
+  </Step>
+</Steps>
+
+<Note>
+  The system automatically calculates payment percentages based on linked REP documents. No manual input is required.
+</Note>
+
+## Manual income entries
+
+For income without a CFDI invoice, you can create manual entries.
+
+### When to use manual income
+
+- Income from foreign clients (no CFDI required)
+- Services that don't require invoicing
+- Income received before issuing the invoice
+- Adjustments and corrections
+
+<Warning>
+  Manual income entries don't have a UUID or digital seal and cannot be used for tax deductions. Only use them for internal tracking.
+</Warning>
+
+### Creating a manual income entry
+
+<Steps>
+  <Step title="Open the manual income dialog">
+    From the invoices list page, click "Ingreso manual" in the top right.
+  </Step>
+
+  <Step title="Fill out the form">
+    Provide the following information:
+    
+    - **Concepto**: Description of the income (e.g., "Honorarios diciembre")
+    - **Subtotal (MXN)**: Amount before tax
+    - **IVA (MXN)**: Value-added tax amount (if applicable)
+    - **Fecha**: Date of the income
+    - **Notas**: Optional notes or client reference
+  </Step>
+
+  <Step title="Submit the entry">
+    Click "Crear ingreso" to add the manual income to your records.
+  </Step>
+</Steps>
+
+### Editing manual income
+
+You can edit manual income entries (but not CFDI invoices):
+
+1. Find the manual income in the "Ingresos manuales" section
+2. Click the edit icon (pencil)
+3. Update the fields as needed
+4. Mark as "Cobrado" (paid) if payment has been received
+5. Add a payment date if marking as paid
+6. Click "Actualizar" to save changes
+
+### Deleting manual income
+
+<Steps>
+  <Step title="Click the delete icon">
+    In the manual income row, click the trash icon.
+  </Step>
+
+  <Step title="Confirm deletion">
+    Type "ELIMINAR" in the confirmation dialog.
+  </Step>
+
+  <Step title="Submit">
+    Click "Eliminar" to permanently remove the manual income entry.
+  </Step>
+</Steps>
+
+## Invoice list and filtering
+
+### Viewing invoices
+
+The main invoices page (`/dashboard/invoices`) shows all your uploaded invoices in a paginated table.
+
+#### Table columns
+
+- **UUID / FOLIO**: Unique identifier for the invoice
+- **FECHA**: Invoice date and time
+- **EMISOR**: Your business name and RFC
+- **RECEPTOR**: Client name and RFC
+- **MONTO**: Subtotal amount
+- **IVA TRASL.**: IVA trasladado (charged to client)
+- **RET. IVA**: IVA retention (if applicable)
+- **RET. ISR**: ISR retention (if applicable)
+- **ESTADO**: Payment and validation status
+- **ACCIONES**: Delete button
+
+### Filtering invoices
+
+Use the filters at the top of the page to narrow down results:
+
+#### Profile filter
+
+Select a specific RFC profile or "Todos" to view all profiles.
+
+#### Period filters
+
+- **Mes**: Select the month (Enero - Diciembre)
+- **Año**: Select the year (current year ± 2 years)
+
+#### Régimen fiscal filter
+
+If you've configured multiple regímenes fiscales for a profile, you can filter invoices by régimen.
+
+#### Search
+
+Search by:
+- UUID
+- Client name (receptor)
+- Client RFC
+- Invoice concept
+
+<Tip>
+  The search has a 500ms debounce, so wait briefly after typing for results to update.
+</Tip>
+
+### Clearing filters
+
+Click "Limpiar filtros" to reset all filters to default values (current month/year, all regimes).
+
+## Deleting invoices
+
+<Warning>
+  Deleting invoices is permanent and irreversible. Ensure you have backups before deleting.
+</Warning>
+
+<Steps>
+  <Step title="Locate the invoice">
+    Find the invoice you want to delete in the invoices table.
+  </Step>
+
+  <Step title="Click the delete button">
+    Click the trash icon in the ACCIONES column.
+  </Step>
+
+  <Step title="Review invoice details">
+    The confirmation dialog shows:
+    - Emisor name
+    - Invoice concept
+    - Total amount
+    - UUID
+  </Step>
+
+  <Step title="Type 'ELIMINAR'">
+    In the text field, type `ELIMINAR` exactly (all caps) to confirm deletion.
+  </Step>
+
+  <Step title="Submit deletion">
+    Click "Eliminar" to permanently remove the invoice from your account.
+  </Step>
+</Steps>
+
+## Usage limits
+
+Your subscription plan includes invoice upload limits:
+
+| Plan | Monthly Invoice Limit |
+|------|----------------------|
+| FREE | 30 invoices/month |
+| STARTER | 100 invoices/month |
+| PROFESSIONAL | 500 invoices/month |
+| ENTERPRISE | Unlimited |
+
+### What counts as usage?
+
+- Each successfully uploaded invoice (valid or invalid)
+- Manual income entries do **not** count toward the limit
+- Failed uploads (rejected before processing) do **not** count
+
+### Usage indicator
+
+The invoice upload page shows your current usage:
+
+```
+15 / 30 facturas utilizadas (50%)
+```
+
+A progress bar visually indicates:
+- **Green** (0-74%): Normal usage
+- **Blue** (75-89%): Approaching limit
+- **Orange** (90-99%): Near limit
+- **Red** (100%): Limit reached
+
+<Note>
+  Usage resets on the 1st of each month. If you exceed your limit, upgrade your plan or wait for the next billing cycle.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Manage expenses" icon="shopping-cart" href="/guides/managing-expenses">
+    Upload and track business expense CFDIs
+  </Card>
+  <Card title="View reports" icon="chart-line" href="/guides/viewing-reports">
+    Generate financial reports and analytics
+  </Card>
+</CardGroup>

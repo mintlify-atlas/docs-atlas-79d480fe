@@ -1,0 +1,173 @@
+---
+title: 'Get Subscription'
+description: 'Retrieve current user subscription information'
+---
+
+## GET /api/subscription
+
+Retrieves the subscription details for the authenticated user, including plan information, status, billing period, and plan limits.
+
+## Authentication
+
+This endpoint requires authentication. Include your access token in the request cookies.
+
+## Response
+
+<ResponseField name="plan" type="string" required>
+  Current plan name. Options: `FREE`, `BASIC`, `PRO`, `ENTERPRISE`
+</ResponseField>
+
+<ResponseField name="status" type="string" required>
+  Subscription status. Options: `ACTIVE`, `CANCELLED`, `EXPIRED`, `PAST_DUE`, `UNPAID`, `TRIALING`
+</ResponseField>
+
+<ResponseField name="planPrice" type="number" required>
+  Monthly price of the plan in the currency (e.g., MXN)
+</ResponseField>
+
+<ResponseField name="currentPeriodStart" type="string" optional>
+  Start date of the current billing period (ISO 8601 format). Null for FREE plan
+</ResponseField>
+
+<ResponseField name="currentPeriodEnd" type="string" optional>
+  End date of the current billing period (ISO 8601 format). Null for FREE plan
+</ResponseField>
+
+<ResponseField name="cancelAtPeriodEnd" type="boolean" required>
+  Whether the subscription will be cancelled at the end of the current period
+</ResponseField>
+
+<ResponseField name="stripeCustomerId" type="string" optional>
+  Stripe customer ID. Null for FREE plan
+</ResponseField>
+
+<ResponseField name="stripeSubscriptionId" type="string" optional>
+  Stripe subscription ID. Null for FREE plan
+</ResponseField>
+
+<ResponseField name="limits" type="object" required>
+  Plan limits and features
+  
+  <Expandable title="Plan Limits">
+    <ResponseField name="profiles" type="number" optional>
+      Maximum number of RFC profiles allowed. Null means unlimited
+    </ResponseField>
+    
+    <ResponseField name="invoicesPerMonth" type="number" optional>
+      Maximum XML files per month. Null means unlimited
+    </ResponseField>
+    
+    <ResponseField name="expensesPerMonth" type="number" optional>
+      Maximum expenses per month. Null means unlimited
+    </ResponseField>
+    
+    <ResponseField name="exportPDF" type="boolean" required>
+      Whether PDF export is enabled
+    </ResponseField>
+    
+    <ResponseField name="exportExcel" type="boolean" required>
+      Whether Excel export is enabled
+    </ResponseField>
+    
+    <ResponseField name="reports" type="string" required>
+      Level of reports available. Options: `basic`, `complete`, `advanced`
+    </ResponseField>
+    
+    <ResponseField name="support" type="string" required>
+      Type of support available. Options: `none`, `email`, `priority`
+    </ResponseField>
+    
+    <ResponseField name="apiAccess" type="boolean" required>
+      Whether API access is enabled
+    </ResponseField>
+    
+    <ResponseField name="satBasicSearchesPerMonth" type="number" optional>
+      SAT basic searches per month. Null means unlimited
+    </ResponseField>
+    
+    <ResponseField name="satAISearchesPerMonth" type="number" optional>
+      SAT AI-powered searches per month. Null means unlimited
+    </ResponseField>
+    
+    <ResponseField name="satMaxResults" type="number" optional>
+      Maximum results per SAT search. Null means no limit
+    </ResponseField>
+    
+    <ResponseField name="satHasAIExplanations" type="boolean" optional>
+      Whether AI explanations are available for SAT searches
+    </ResponseField>
+    
+    <ResponseField name="satHasHistory" type="boolean" optional>
+      Whether search history is enabled
+    </ResponseField>
+    
+    <ResponseField name="satHasFavorites" type="boolean" optional>
+      Whether favorites feature is enabled
+    </ResponseField>
+    
+    <ResponseField name="satHasAlerts" type="boolean" optional>
+      Whether alerts feature is enabled
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Request
+
+```bash
+curl -X GET "https://api.contafy.com/api/subscription" \
+  -H "Cookie: access_token=your_access_token"
+```
+
+## Example Response
+
+```json
+{
+  "plan": "PRO",
+  "status": "ACTIVE",
+  "planPrice": 599,
+  "currentPeriodStart": "2024-03-01T00:00:00Z",
+  "currentPeriodEnd": "2024-04-01T00:00:00Z",
+  "cancelAtPeriodEnd": false,
+  "stripeCustomerId": "cus_123456789",
+  "stripeSubscriptionId": "sub_987654321",
+  "limits": {
+    "profiles": null,
+    "invoicesPerMonth": null,
+    "expensesPerMonth": null,
+    "exportPDF": true,
+    "exportExcel": true,
+    "reports": "advanced",
+    "support": "priority",
+    "apiAccess": true,
+    "satBasicSearchesPerMonth": null,
+    "satAISearchesPerMonth": 500,
+    "satMaxResults": null,
+    "satHasAIExplanations": true,
+    "satHasHistory": true,
+    "satHasFavorites": true,
+    "satHasAlerts": true
+  }
+}
+```
+
+## Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Authentication required or token expired
+  ```json
+  {
+    "error": "Unauthorized",
+    "message": "Authentication required"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error" type="error">
+  Server error occurred
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An unexpected error occurred"
+  }
+  ```
+</ResponseField>

@@ -1,0 +1,405 @@
+---
+title: Viewing reports
+description: Generate and analyze financial reports, charts, and metrics in Contafy
+---
+
+Contafy provides powerful reporting tools to analyze your invoices, expenses, and cash flow. Generate visual reports, track trends, and make data-driven financial decisions.
+
+## Dashboard overview
+
+The main dashboard (`/dashboard`) provides a high-level view of your financial activity.
+
+### Dashboard greeting
+
+The dashboard greets you by name and displays the selected company (profile) or "Todas las empresas" if viewing all profiles.
+
+### Accessing the dashboard
+
+<Steps>
+  <Step title="Log in to Contafy">
+    Navigate to `/dashboard` after logging in.
+  </Step>
+
+  <Step title="Select a profile (optional)">
+    Use the profile selector in the header to:
+    - View a specific RFC profile
+    - Select "Todas las empresas" for aggregated data
+  </Step>
+
+  <Step title="Choose the time period">
+    Select:
+    - **Mes**: Month to analyze
+    - **Año**: Year
+    - **Régimen fiscal**: Filter by tax regime (if applicable)
+  </Step>
+</Steps>
+
+<Note>
+  The dashboard automatically loads data for the current month and year when you first visit.
+</Note>
+
+## Financial metrics cards
+
+At the top of the dashboard, four metric cards display key financial indicators.
+
+### Total facturado (Total invoiced)
+
+- **What it shows**: Sum of all invoice subtotals for the selected period
+- **Includes**: PUE, PPD, and manual income entries
+- **Excludes**: Payment complements (REP)
+
+**Icon**: Blue card with trending up arrow
+
+### Total de gastos (Total expenses)
+
+- **What it shows**: Sum of all expense subtotals for the selected period
+- **Includes**: XML expenses and manual expense entries
+- **Excludes**: Invalid or rejected expenses
+
+**Icon**: Purple card with shopping cart
+
+### Diferencia (Difference/Net income)
+
+- **What it shows**: Total facturado minus Total de gastos
+- **Color coding**:
+  - **Green**: Positive difference (profit)
+  - **Red**: Negative difference (loss)
+  - **Gray**: Zero difference
+
+**Icon**: Trending up (profit) or trending down (loss)
+
+### Facturas pendientes de pago (Pending invoices)
+
+- **What it shows**: Number of unpaid PPD invoices
+- **Includes**: PPD invoices with no payment or partial payment
+- **Excludes**: PUE invoices (always considered paid)
+
+**Icon**: Orange card with clock
+
+<Tip>
+  Click on any metric card to navigate to the detailed invoices or expenses page with the same filters applied.
+</Tip>
+
+## Flow trend chart
+
+The flow trend chart visualizes income and expense trends over time.
+
+### Chart features
+
+- **X-axis**: Time period (months for yearly view, days for monthly view)
+- **Y-axis**: Amount in MXN
+- **Two lines**:
+  - **Blue line**: Income (facturas)
+  - **Purple line**: Expenses (gastos)
+- **Interactive**: Hover over data points to see exact values
+- **Responsive**: Adapts to screen size
+
+### Viewing options
+
+#### Año actual (Current year)
+
+Shows monthly income and expenses for the entire year:
+- January through December
+- Each data point represents the month's total
+- Useful for annual trends and seasonality
+
+#### Mes actual (Current month)
+
+Shows daily income and expenses for the selected month:
+- Day 1 through last day of month
+- Each data point represents a single day
+- Useful for detailed cash flow analysis
+
+#### Switch between views
+
+Use the toggle buttons above the chart:
+- Click "Año actual" for yearly view
+- Click "Mes actual" for monthly view
+
+<Note>
+  The chart automatically updates when you change the profile, month, year, or régimen fiscal filters.
+</Note>
+
+## Recent invoices table
+
+The dashboard displays the 3 most recent invoices.
+
+### Table information
+
+- **UUID**: Invoice unique identifier
+- **Fecha**: Invoice date
+- **Emisor**: Your business name
+- **Receptor**: Client name and RFC
+- **Total**: Invoice total amount
+- **Estado**: Payment status (Pagado, No Pagado, Pago Parcial)
+
+### Viewing all invoices
+
+Click "Ver todas las facturas" to navigate to the full invoices list with detailed filtering and search.
+
+## Recent expenses table
+
+The dashboard shows the 3 most recent expenses.
+
+### Table information
+
+- **UUID**: Expense unique identifier
+- **Fecha**: Expense date
+- **Emisor**: Vendor/supplier name
+- **Total**: Expense amount
+- **Categoría**: Expense category badge (if assigned)
+
+### Viewing all expenses
+
+Click "Ver todos los gastos" to access the complete expenses list.
+
+## Detailed invoice reports
+
+The invoices page (`/dashboard/invoices`) provides comprehensive reporting for income.
+
+### Invoice summary cards
+
+At the top of the invoices page:
+
+#### Total de facturas (Invoice count)
+
+Number of invoices in the current filtered view.
+
+#### Facturas pendientes de pago
+
+Count of unpaid or partially paid PPD invoices.
+
+#### Total facturado
+
+Sum of all invoice subtotals (excluding payment complements).
+
+### Invoice breakdown
+
+The table shows detailed information for each invoice:
+
+- **UUID / FOLIO**: Unique identifier
+- **FECHA**: Invoice date and time
+- **EMISOR**: Your business name and RFC
+- **RECEPTOR**: Client name and RFC
+- **MONTO**: Subtotal amount
+- **IVA TRASL.**: IVA charged to client
+- **RET. IVA**: IVA retention
+- **RET. ISR**: ISR retention
+- **ESTADO**: Validation and payment status
+- **ACCIONES**: Delete button
+
+### Manual income section
+
+Below the summary cards, a separate section displays manual income entries (income without CFDI):
+
+- **Concepto**: Description
+- **Fecha**: Income date
+- **Subtotal**: Amount before tax
+- **IVA**: Tax amount
+- **Total**: Final amount
+- **Cobrado**: Payment status (Sí/No)
+- **Acciones**: Edit and delete buttons
+
+<Tip>
+  Manual income entries are displayed separately from CFDI invoices for clarity. They contribute to financial metrics but don't have UUIDs.
+</Tip>
+
+## Detailed expense reports
+
+The expenses page (`/dashboard/expenses`) offers comprehensive expense reporting.
+
+### Expense summary cards
+
+#### Total de gastos (Expense count)
+
+Number of expenses in the current view.
+
+#### Total gastado
+
+Sum of all expense subtotals.
+
+#### Categoría breakdown
+
+If you've assigned categories, a pie chart or breakdown shows spending by category:
+- Viáticos
+- Oficina
+- Servicios
+- Transporte
+- Alimentación
+
+### Expense breakdown table
+
+Detailed expense information:
+
+- **UUID / FOLIO**: Identifier (or "Manual")
+- **FECHA**: Expense date
+- **EMISOR**: Vendor name and RFC
+- **RECEPTOR**: Your business name and RFC
+- **MONTO**: Subtotal
+- **IVA TRASL.**: IVA charged
+- **CATEGORÍA**: Category badge
+- **ORIGEN**: XML or Manual
+- **ESTADO**: Validation status
+- **ACCIONES**: Edit (manual) or delete
+
+## Combined financial report
+
+For a complete financial picture, generate a combined report showing both income and expenses.
+
+### Accessing the combined report
+
+<Steps>
+  <Step title="Navigate to the dashboard">
+    Go to `/dashboard` and select your desired filters (profile, month, year, régimen).
+  </Step>
+
+  <Step title="Click 'Exportar PDF'">
+    In the top right of the dashboard, click the "Exportar PDF" button.
+  </Step>
+
+  <Step title="Wait for generation">
+    The system generates a PDF report including:
+    - Header with your business information
+    - Financial metrics summary
+    - Income breakdown (facturas pagadas y pendientes)
+    - Expense breakdown
+    - Net income calculation
+  </Step>
+
+  <Step title="Download the PDF">
+    The PDF automatically downloads to your device.
+  </Step>
+</Steps>
+
+<Note>
+  PDF export is a premium feature available on PROFESSIONAL and ENTERPRISE plans. FREE and STARTER plans show an upgrade prompt.
+</Note>
+
+### Report preview
+
+Before exporting, you can preview the report:
+
+1. Click "Vista previa" instead of "Exportar PDF"
+2. A new page opens showing the formatted report
+3. Review the data for accuracy
+4. Click "Exportar PDF" to download or "Volver" to go back
+
+## Report filtering and customization
+
+### By profile
+
+Generate reports for:
+- **A specific RFC**: Select the profile from the dropdown
+- **All profiles**: Choose "Todos" to aggregate data across all your businesses
+
+### By time period
+
+Customize the report period:
+- **Monthly reports**: Select month and year
+- **Yearly reports**: Use the year selector and view annual trends
+- **Custom periods**: Combine filters for specific date ranges
+
+### By régimen fiscal
+
+If your profile has multiple tax regimes:
+1. Select the profile
+2. Choose the régimen fiscal from the dropdown
+3. Only invoices/expenses matching that régimen are included
+
+<Tip>
+  Generate separate reports for each régimen fiscal to simplify tax filing and accounting.
+</Tip>
+
+## Understanding payment status
+
+Invoice and expense reports show payment status for better cash flow tracking.
+
+### Invoice payment statuses
+
+| Status | Description | When it applies |
+|--------|-------------|----------------|
+| **✓ Pagado** | Fully paid | PUE invoices or PPD with full payment |
+| **No Pagado** | Unpaid | PPD with no payment complements |
+| **Pago Parcial (X%)** | Partially paid | PPD with partial payment |
+
+### Payment tracking
+
+For PPD invoices:
+- Upload REP (payment complement) XML files
+- System automatically links REP to original invoice
+- Payment status updates in real-time
+- Progress is calculated based on paid amount / total
+
+<Note>
+  PUE invoices are always marked as "Pagado" since they represent single-payment transactions.
+</Note>
+
+## Trial banner
+
+If you're on a trial subscription, a banner appears at the top of the dashboard:
+
+- **Days remaining**: Shows how many trial days are left
+- **Upgrade prompt**: Suggests upgrading to a paid plan
+- **Feature highlights**: Lists premium features available after upgrade
+
+## Best practices
+
+### Regular review
+
+- Check the dashboard weekly to monitor cash flow
+- Review pending invoices and follow up with clients
+- Compare monthly trends to identify patterns
+
+### Accurate categorization
+
+- Assign categories to manual expenses
+- Use consistent naming for expense concepts
+- Categorization improves report accuracy
+
+### Export reports monthly
+
+- Generate PDF reports at month-end
+- Share with your accountant
+- Keep copies for your records
+
+### Monitor metrics
+
+- Track the Diferencia (net income) metric
+- Watch for increasing pending invoices
+- Compare year-over-year growth
+
+## Troubleshooting
+
+### "No hay datos para mostrar"
+
+No data exists for the selected filters. Solutions:
+1. Expand the date range
+2. Select "Todos" for profile
+3. Remove régimen fiscal filter
+4. Upload invoices or expenses first
+
+### Chart not loading
+
+The flow trend chart requires JavaScript. Ensure:
+1. JavaScript is enabled in your browser
+2. No ad blockers are interfering
+3. Your browser is up to date
+
+### Metrics seem incorrect
+
+If numbers don't match expectations:
+1. Verify the selected filters (profile, month, year)
+2. Check if all invoices/expenses uploaded successfully
+3. Review validation errors on uploaded files
+4. Clear filters and reapply
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Export data" icon="file-download" href="/guides/exporting-data">
+    Export reports to PDF and Excel for accounting
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Integrate Contafy data with your own systems
+  </Card>
+</CardGroup>
